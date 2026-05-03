@@ -1,0 +1,152 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500&family=Outfit:wght@200;300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --pink: #FF1F6D;
+  --gold: #D4A843;
+  --dark: #080808;
+  --card: #111111;
+  --muted: #1a1a1a;
+  --light: #F5F5F0;
+  --gray: #888888;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--dark);
+  color: var(--light);
+  font-family: 'Outfit', sans-serif;
+  overflow-x: hidden;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--dark); }
+::-webkit-scrollbar-thumb { background: var(--pink); border-radius: 2px; }
+
+/* Selection */
+::selection {
+  background: var(--pink);
+  color: white;
+}
+
+/* Utility classes */
+@layer components {
+  .btn-primary {
+    @apply bg-brand-pink text-white font-body font-semibold px-6 py-3 rounded-none
+           transition-all duration-300 hover:bg-white hover:text-brand-pink
+           border border-brand-pink tracking-widest uppercase text-sm;
+  }
+
+  .btn-outline {
+    @apply border border-brand-light text-brand-light font-body font-medium px-6 py-3
+           rounded-none transition-all duration-300 hover:bg-brand-light hover:text-brand-dark
+           tracking-widest uppercase text-sm;
+  }
+
+  .btn-gold {
+    @apply bg-brand-gold text-brand-dark font-body font-bold px-6 py-3 rounded-none
+           transition-all duration-300 hover:bg-yellow-400
+           tracking-widest uppercase text-sm;
+  }
+
+  .card-product {
+    @apply bg-brand-card border border-white/5 overflow-hidden
+           transition-all duration-500 hover:border-brand-pink/50 hover:-translate-y-1;
+  }
+
+  .section-title {
+    @apply font-display text-4xl md:text-5xl lg:text-6xl font-light text-brand-light leading-tight;
+  }
+
+  .label-tag {
+    @apply font-body text-xs tracking-widest uppercase text-brand-gray;
+  }
+
+  .input-field {
+    @apply w-full bg-brand-muted border border-white/10 text-brand-light px-4 py-3
+           font-body focus:outline-none focus:border-brand-pink transition-colors duration-200
+           placeholder-brand-gray;
+  }
+
+  .nav-link {
+    @apply font-body text-sm tracking-widest uppercase text-brand-gray
+           hover:text-brand-light transition-colors duration-200;
+  }
+}
+
+/* Ticker tape */
+.ticker-wrapper {
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.ticker-content {
+  display: inline-flex;
+  animation: ticker 30s linear infinite;
+}
+
+/* Glass card */
+.glass-card {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+/* Pink glow */
+.pink-glow {
+  box-shadow: 0 0 30px rgba(255, 31, 109, 0.3);
+}
+
+/* Gold shimmer */
+.gold-shimmer {
+  background: linear-gradient(90deg, var(--gold), #f0d080, var(--gold));
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 3s linear infinite;
+}
+
+@keyframes shimmer {
+  to { background-position: 200% center; }
+}
+
+/* Image hover zoom */
+.img-zoom img {
+  transition: transform 0.6s ease;
+}
+.img-zoom:hover img {
+  transform: scale(1.08);
+}
+
+/* Page transition */
+.page-enter {
+  opacity: 0;
+  transform: translateY(20px);
+}
+.page-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: all 0.4s ease;
+}
+
+/* Admin table */
+.admin-table th {
+  @apply text-xs tracking-widest uppercase text-brand-gray border-b border-white/10 pb-3;
+}
+.admin-table td {
+  @apply py-4 border-b border-white/5 text-sm text-brand-light;
+}
