@@ -81,8 +81,8 @@ export default function Contact() {
                 icon: FiMail,
                 iconClass: 'text-brand-gold',
                 label: 'Email',
-                value: 'info@nickycollections.com',
-                href: 'mailto:info@nickycollections.com',
+                value: 'nickycollection01@gmail.com',
+                href: 'mailto:nickycollection01@gmail.com',
                 desc: 'For business inquiries'
               },
             ].map(contact => (

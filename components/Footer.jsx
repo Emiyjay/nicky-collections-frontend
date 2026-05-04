@@ -92,7 +92,7 @@ export default function Footer() {
               </a>
               <div className="flex items-center gap-3 text-sm text-brand-gray">
                 <FiMail size={14} className="text-brand-gold" />
-                <span>info@nickycollections.com</span>
+                <span>nickycollection01@gmail.com</span>
               </div>
             </div>
           </div>
