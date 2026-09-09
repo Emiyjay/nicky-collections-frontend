@@ -1,26 +1,38 @@
 import { SITE_URL } from '../lib/site';
 
-const CORE_ROUTES = ['/', '/shop', '/about', '/contact'];
+const CORE_ROUTES = ['/', '/shop', '/about', '/contact', '/blog'];
 
 export default function Sitemap() {}
 
 export async function getServerSideProps({ res }) {
   const urls = CORE_ROUTES.map((route) => `${SITE_URL}${route}`);
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-  try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-    if (apiUrl) {
-      const response = await fetch(`${apiUrl}/products?limit=1000`);
-      if (response.ok) {
-        const payload = await response.json();
+  if (apiUrl) {
+    try {
+      const productResponse = await fetch(`${apiUrl}/products?limit=1000`);
+      if (productResponse.ok) {
+        const payload = await productResponse.json();
         const products = Array.isArray(payload) ? payload : payload.products || [];
         products.forEach((product) => {
           if (product?._id) urls.push(`${SITE_URL}/product/${encodeURIComponent(product._id)}`);
         });
       }
+    } catch (error) {
+      console.error('Sitemap product fetch failed:', error.message);
     }
-  } catch (error) {
-    console.error('Sitemap product fetch failed:', error.message);
+
+    try {
+      const blogResponse = await fetch(`${apiUrl}/blog?limit=1000`);
+      if (blogResponse.ok) {
+        const posts = await blogResponse.json();
+        posts.forEach((post) => {
+          if (post?.slug) urls.push(`${SITE_URL}/blog/${encodeURIComponent(post.slug)}`);
+        });
+      }
+    } catch (error) {
+      console.error('Sitemap blog fetch failed:', error.message);
+    }
   }
 
   const uniqueUrls = [...new Set(urls)];
