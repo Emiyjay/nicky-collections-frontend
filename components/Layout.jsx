@@ -41,12 +41,17 @@ export default function Layout({ children }) {
   return (
     <div className={darkMode ? 'dark' : ''}>
       <div className="min-h-screen bg-brand-dark text-brand-light">
+        <a href="#main-content" className="skip-link">Skip to content</a>
         <Navbar darkMode={darkMode} toggleDarkMode={() => setDarkMode(!darkMode)} />
 
-        <main className="pt-16">
+        <main id="main-content" tabIndex="-1" className="pt-16 outline-none">
           <AnimatePresence mode="wait">
-            <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -16 }} transition={{ duration: 0.35 }}>
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -16 }}
+              transition={{ duration: 0.35 }}
+            >
               {children}
               {relatedProductId && <RelatedProducts productId={relatedProductId} category={relatedCategory} />}
             </motion.div>
@@ -55,9 +60,19 @@ export default function Layout({ children }) {
 
         <Footer />
 
-        <a href={WHATSAPP_LINK} target="_blank" rel="noreferrer"
-          className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-green-500 rounded-full flex items-center justify-center shadow-lg shadow-green-500/30 hover:bg-green-400 hover:scale-110 transition-all duration-300 animate-pulse-glow">
-          <FaWhatsapp size={26} color="white" />
+        <a
+          href={WHATSAPP_LINK}
+          target="_blank"
+          rel="noreferrer"
+          aria-label="Chat with Nicky Collections on WhatsApp"
+          className="fixed bottom-5 right-5 md:bottom-6 md:right-6 z-50 group"
+        >
+          <span className="absolute right-0 bottom-full mb-3 hidden md:block whitespace-nowrap bg-brand-dark border border-white/10 px-3 py-2 text-xs font-body tracking-wide text-brand-light opacity-0 translate-y-1 pointer-events-none transition-all duration-200 group-hover:opacity-100 group-hover:translate-y-0 group-focus-within:opacity-100 group-focus-within:translate-y-0">
+            Chat on WhatsApp
+          </span>
+          <span className="flex w-14 h-14 items-center justify-center rounded-full bg-green-500 shadow-lg shadow-green-500/30 hover:bg-green-400 hover:scale-105 transition-transform duration-300">
+            <FaWhatsapp size={26} color="white" aria-hidden="true" />
+          </span>
         </a>
 
         <Toaster position="top-right" toastOptions={{
