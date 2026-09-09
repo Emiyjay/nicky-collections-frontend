@@ -1,6 +1,6 @@
 import { SITE_URL } from '../lib/site';
 
-const CORE_ROUTES = ['/', '/shop', '/about', '/contact', '/blog'];
+const CORE_ROUTES = ['/', '/shop', '/about', '/contact', '/blog', '/collections/footwear', '/collections/outerwear', '/collections/accessories', '/collections/clothing', '/collections/collectibles', '/collections/other'];
 
 export default function Sitemap() {}
 
