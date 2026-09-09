@@ -10,10 +10,10 @@ import { TIKTOK_URL, WHATSAPP_LINK } from '../lib/whatsapp';
 import { DISPLAY_PHONE_NUMBER } from '../lib/site';
 
 const CATEGORIES = [
-  { label: 'Footwear', icon: '👟', href: '/shop?category=footwear' },
-  { label: 'Outerwear', icon: '🧥', href: '/shop?category=outerwear' },
-  { label: 'Accessories', icon: '🛍️', href: '/shop?category=accessories' },
-  { label: 'Collectibles', icon: '🏆', href: '/shop?category=collectibles' },
+  { label: 'Footwear', icon: '👟', slug: 'footwear' },
+  { label: 'Outerwear', icon: '🧥', slug: 'outerwear' },
+  { label: 'Accessories', icon: '🛍️', slug: 'accessories' },
+  { label: 'Collectibles', icon: '🏆', slug: 'collectibles' },
 ];
 
 export default function Home() {
@@ -60,7 +60,7 @@ export default function Home() {
         <a href={TIKTOK_URL} target="_blank" rel="noreferrer" className="absolute bottom-10 left-1/2 -translate-x-1/2 flex items-center gap-3 glass-card px-5 py-3 hover:border-brand-pink/30 transition-all"><FaTiktok size={14} className="text-brand-pink" /><span className="font-body text-xs tracking-widest uppercase text-brand-gray">Follow @shopwithnickycollections</span></a>
       </section>
 
-      <section className="py-20 px-6 md:px-8 max-w-7xl mx-auto"><div className="flex items-end justify-between mb-12"><div><p className="label-tag text-brand-pink mb-3">Browse By</p><h2 className="section-title">Categories</h2></div></div><div className="grid grid-cols-2 md:grid-cols-4 gap-4">{CATEGORIES.map((cat, i) => <motion.div key={cat.label} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}><Link href={cat.href} className="block bg-brand-card border border-white/5 hover:border-brand-pink/50 p-8 text-center group transition-all duration-300 hover:-translate-y-1"><div className="text-4xl mb-4">{cat.icon}</div><h3 className="font-body text-sm tracking-widest uppercase text-brand-gray group-hover:text-brand-light transition-colors">{cat.label}</h3></Link></motion.div>)}</div></section>
+      <section className="py-20 px-6 md:px-8 max-w-7xl mx-auto"><div className="flex items-end justify-between mb-12"><div><p className="label-tag text-brand-pink mb-3">Browse By</p><h2 className="section-title">Categories</h2></div></div><div className="grid grid-cols-2 md:grid-cols-4 gap-4">{CATEGORIES.map((cat, i) => <motion.div key={cat.label} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}><Link href={`/collections/${cat.slug}`} className="block bg-brand-card border border-white/5 hover:border-brand-pink/50 p-8 text-center group transition-all duration-300 hover:-translate-y-1"><div className="text-4xl mb-4">{cat.icon}</div><h3 className="font-body text-sm tracking-widest uppercase text-brand-gray group-hover:text-brand-light transition-colors">{cat.label}</h3></Link></motion.div>)}</div></section>
 
       {featured.length > 0 && <section className="py-20 px-6 md:px-8 max-w-7xl mx-auto"><div className="flex items-end justify-between mb-12"><div><p className="label-tag text-brand-pink mb-3">Hand-Picked</p><h2 className="section-title">Featured</h2></div><Link href="/shop?featured=true" className="btn-outline text-xs">View All <FiArrowRight className="inline ml-2" size={12} /></Link></div><div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">{featured.slice(0, 4).map((product, i) => <ProductCard key={product._id} product={product} index={i} />)}</div></section>}
 
