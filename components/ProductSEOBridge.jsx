@@ -15,7 +15,8 @@ export default function ProductSEOBridge() {
 
   if (!product) return null;
 
-  const productUrl = `${SITE_URL}/product/${encodeURIComponent(product._id)}`;
+  const identifier = product.slug || product._id;
+  const productUrl = `${SITE_URL}/product/${encodeURIComponent(identifier)}`;
   return (
     <>
       <ProductStructuredData product={product} url={productUrl} />
