@@ -1,6 +1,7 @@
 import Head from 'next/head';
 import Link from 'next/link';
 import ProductCard from '../../components/ProductCard';
+import CollectionLinks from '../../components/CollectionLinks';
 import { SITE_NAME, SITE_URL } from '../../lib/site';
 
 const CATEGORIES = {
@@ -27,21 +28,19 @@ export default function CollectionPage({ category, products, total }) {
         <meta property="og:description" content={meta.description} />
         <meta property="og:url" content={canonical} />
       </Head>
-
       <main className="max-w-7xl mx-auto px-6 md:px-8 pt-20 pb-20">
         <nav aria-label="Breadcrumb" className="mb-8 text-xs uppercase tracking-widest text-brand-gray">
-          <Link href="/shop" className="hover:text-brand-light">Shop</Link>
-          <span className="mx-2">/</span>
+          <Link href="/shop" className="hover:text-brand-light">Shop</Link><span className="mx-2">/</span>
+          <Link href="/collections" className="hover:text-brand-light">Collections</Link><span className="mx-2">/</span>
           <span className="text-brand-pink">{meta.title}</span>
         </nav>
-
         <header className="border-b border-white/10 pb-10 mb-10">
           <p className="label-tag text-brand-pink mb-3">Nicky Collections</p>
           <h1 className="section-title">{meta.title}</h1>
           <p className="font-body text-brand-gray max-w-2xl mt-4 leading-relaxed">{meta.description}</p>
           <p className="font-body text-sm text-brand-gray mt-4">{total} {total === 1 ? 'product' : 'products'}</p>
         </header>
-
+        <CollectionLinks className="mb-10" />
         {products.length ? (
           <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
             {products.map((product, index) => <ProductCard key={product._id} product={product} index={index} />)}
@@ -60,10 +59,8 @@ export default function CollectionPage({ category, products, total }) {
 export async function getServerSideProps({ params, res }) {
   const category = String(params.category || '').toLowerCase();
   if (!CATEGORIES[category]) return { notFound: true };
-
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
   if (!apiUrl) return { props: { category, products: [], total: 0 } };
-
   try {
     const response = await fetch(`${apiUrl}/products?category=${encodeURIComponent(category)}&limit=100`);
     if (!response.ok) throw new Error(`Product API returned ${response.status}`);
