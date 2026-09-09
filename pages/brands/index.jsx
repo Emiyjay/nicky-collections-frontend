@@ -32,7 +32,7 @@ export default function BrandsPage({ brands }) {
             {brands.map((brand) => (
               <Link
                 key={brand}
-                href={`/brands/${encodeURIComponent(brand.toLowerCase().replace(/\s+/g, '-'))}`}
+                href={`/brands/${encodeURIComponent(brand)}`}
                 className="block bg-brand-card border border-white/5 hover:border-brand-pink/50 p-8 group transition-all duration-300 hover:-translate-y-1"
               >
                 <span className="label-tag text-brand-pink">Brand</span>
