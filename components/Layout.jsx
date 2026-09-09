@@ -4,7 +4,8 @@ import Navbar from './Navbar';
 import Footer from './Footer';
 import { Toaster } from 'react-hot-toast';
 import { FaWhatsapp } from 'react-icons/fa';
-import { WHATSAPP_LINK } from '../lib/whatsapp';
+import { FiPhone, FiMessageSquare } from 'react-icons/fi';
+import { WHATSAPP_LINK, CALL_LINK, SMS_LINK } from '../lib/whatsapp';
 
 export default function Layout({ children }) {
   const [darkMode, setDarkMode] = useState(true);
@@ -29,18 +30,23 @@ export default function Layout({ children }) {
 
         <Footer />
 
-        {/* Floating WhatsApp button */}
-        <a
-          href={WHATSAPP_LINK}
-          target="_blank"
-          rel="noreferrer"
-          className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-green-500 rounded-full
-                     flex items-center justify-center shadow-lg shadow-green-500/30
-                     hover:bg-green-400 hover:scale-110 transition-all duration-300
-                     animate-pulse-glow"
-        >
-          <FaWhatsapp size={26} color="white" />
-        </a>
+        <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-2">
+          <a href={CALL_LINK} aria-label="Call Nicky Collections"
+            className="w-11 h-11 bg-brand-gold rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-all"
+          >
+            <FiPhone size={19} color="white" />
+          </a>
+          <a href={SMS_LINK} aria-label="Send SMS to Nicky Collections"
+            className="w-11 h-11 bg-brand-pink rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-all"
+          >
+            <FiMessageSquare size={18} color="white" />
+          </a>
+          <a href={WHATSAPP_LINK} target="_blank" rel="noreferrer" aria-label="Chat with Nicky Collections on WhatsApp"
+            className="w-14 h-14 bg-green-500 rounded-full flex items-center justify-center shadow-lg shadow-green-500/30 hover:bg-green-400 hover:scale-110 transition-all duration-300 animate-pulse-glow"
+          >
+            <FaWhatsapp size={26} color="white" />
+          </a>
+        </div>
 
         <Toaster
           position="top-right"
