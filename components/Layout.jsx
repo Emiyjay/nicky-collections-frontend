@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import SiteStructuredData from './SiteStructuredData';
+import ProductSEOBridge from './ProductSEOBridge';
 import { Toaster } from 'react-hot-toast';
 import { FaWhatsapp } from 'react-icons/fa';
 import { WHATSAPP_LINK } from '../lib/whatsapp';
@@ -14,6 +15,7 @@ export default function Layout({ children }) {
     <div className={darkMode ? 'dark' : ''}>
       <div className="min-h-screen bg-brand-dark text-brand-light">
         <SiteStructuredData />
+        <ProductSEOBridge />
         <Navbar darkMode={darkMode} toggleDarkMode={() => setDarkMode(!darkMode)} />
         <main className="pt-16">
           <AnimatePresence mode="wait">
