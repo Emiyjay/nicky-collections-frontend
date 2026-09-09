@@ -15,7 +15,8 @@ export async function getServerSideProps({ res }) {
         const payload = await productResponse.json();
         const products = Array.isArray(payload) ? payload : payload.products || [];
         products.forEach((product) => {
-          if (product?._id) urls.push(`${SITE_URL}/product/${encodeURIComponent(product._id)}`);
+          const identifier = product?.slug || product?._id;
+          if (identifier) urls.push(`${SITE_URL}/product/${encodeURIComponent(identifier)}`);
         });
       }
     } catch (error) {
