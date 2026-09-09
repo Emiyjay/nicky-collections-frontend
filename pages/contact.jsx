@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { FaWhatsapp, FaTiktok, FaInstagram } from 'react-icons/fa';
 import { FiMail } from 'react-icons/fi';
 import { TIKTOK_URL, WHATSAPP_LINK, contactOnWhatsApp } from '../lib/whatsapp';
+import { DISPLAY_PHONE_NUMBER } from '../lib/site';
 
 export default function Contact() {
   const handleSubmit = (e) => {
@@ -25,7 +26,6 @@ export default function Contact() {
         </motion.div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
-          {/* Contact form */}
           <div>
             <h2 className="font-display text-2xl text-brand-light mb-8">Send a Message</h2>
             <form onSubmit={handleSubmit} className="space-y-5">
@@ -43,8 +43,7 @@ export default function Contact() {
               </div>
               <div>
                 <label className="label-tag block mb-2">Message</label>
-                <textarea name="message" required rows={5} placeholder="How can we help?"
-                  className="input-field w-full resize-none" />
+                <textarea name="message" required rows={5} placeholder="How can we help?" className="input-field w-full resize-none" />
               </div>
               <button type="submit" className="bg-green-500 hover:bg-green-400 text-white font-body font-semibold text-sm tracking-widest uppercase px-8 py-4 flex items-center gap-3 transition-colors">
                 <FaWhatsapp size={18} />
@@ -56,7 +55,6 @@ export default function Contact() {
             </form>
           </div>
 
-          {/* Contact info */}
           <div className="space-y-8">
             <h2 className="font-display text-2xl text-brand-light">Find Us On</h2>
 
@@ -65,7 +63,7 @@ export default function Contact() {
                 icon: FaWhatsapp,
                 iconClass: 'text-green-400',
                 label: 'WhatsApp',
-                value: '+1 (707) 362-6557',
+                value: DISPLAY_PHONE_NUMBER,
                 href: WHATSAPP_LINK,
                 desc: 'Fastest way to order or ask questions'
               },
@@ -86,14 +84,11 @@ export default function Contact() {
                 desc: 'For business inquiries'
               },
             ].map(contact => (
-              <a key={contact.label} href={contact.href} target="_blank" rel="noreferrer"
-                className="flex gap-5 glass-card p-6 hover:border-brand-pink/30 transition-all group">
+              <a key={contact.label} href={contact.href} target="_blank" rel="noreferrer" className="flex gap-5 glass-card p-6 hover:border-brand-pink/30 transition-all group">
                 <contact.icon size={24} className={`${contact.iconClass} mt-1 shrink-0`} />
                 <div>
                   <p className="label-tag text-brand-light mb-1">{contact.label}</p>
-                  <p className="font-body text-brand-light font-medium group-hover:text-brand-pink transition-colors">
-                    {contact.value}
-                  </p>
+                  <p className="font-body text-brand-light font-medium group-hover:text-brand-pink transition-colors">{contact.value}</p>
                   <p className="font-body text-xs text-brand-gray mt-1">{contact.desc}</p>
                 </div>
               </a>
