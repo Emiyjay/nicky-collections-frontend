@@ -24,6 +24,7 @@ export default function ProductCard({ product, index = 0 }) {
 
   const mainImage = product.images?.[imgIdx]?.url || '/placeholder.jpg';
   const secondImage = product.images?.[1]?.url;
+  const productPath = '/product/' + encodeURIComponent(product.slug || product._id);
 
   return (
     <motion.div
@@ -32,7 +33,7 @@ export default function ProductCard({ product, index = 0 }) {
       transition={{ delay: index * 0.08, duration: 0.5 }}
       className="card-product group"
     >
-      <Link href={'/product/' + product._id}>
+      <Link href={productPath}>
         <div className="relative overflow-hidden bg-brand-muted aspect-[3/4] img-zoom">
           <Image
             src={mainImage}
