@@ -29,6 +29,7 @@ export async function getServerSideProps({ res }) {
     const identifier = product.slug || product._id;
     const productUrl = `${SITE_URL}/product/${encodeURIComponent(identifier)}`;
     const imageUrl = product.images?.[0]?.url;
+    const hasSale = product.comparePrice && Number(product.comparePrice) > Number(product.price);
     if (!identifier || !imageUrl || product.price == null) return '';
 
     return `<item>` +
@@ -37,13 +38,11 @@ export async function getServerSideProps({ res }) {
       `<g:description>${escapeXml(product.description || product.name)}</g:description>` +
       `<g:link>${escapeXml(productUrl)}</g:link>` +
       `<g:image_link>${escapeXml(imageUrl)}</g:image_link>` +
-      `<g:price>${Number(product.price).toFixed(2)} USD</g:price>` +
+      `<g:price>${Number(hasSale ? product.comparePrice : product.price).toFixed(2)} USD</g:price>` +
+      (hasSale ? `<g:sale_price>${Number(product.price).toFixed(2)} USD</g:sale_price>` : '') +
       `<g:availability>${product.inStock ? 'in_stock' : 'out_of_stock'}</g:availability>` +
       (product.brand ? `<g:brand>${escapeXml(product.brand)}</g:brand>` : '') +
       (product.category ? `<g:product_type>${escapeXml(product.category)}</g:product_type>` : '') +
-      (product.comparePrice && Number(product.comparePrice) > Number(product.price)
-        ? `<g:sale_price>${Number(product.price).toFixed(2)} USD</g:sale_price>`
-        : '') +
       `</item>`;
   }).filter(Boolean).join('');
 
