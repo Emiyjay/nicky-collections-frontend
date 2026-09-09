@@ -3,7 +3,7 @@ import Head from 'next/head';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { FiArrowRight, FiPlay } from 'react-icons/fi';
+import { FiArrowRight, FiArrowUpRight, FiChevronDown } from 'react-icons/fi';
 import { FaTiktok, FaWhatsapp } from 'react-icons/fa';
 import ProductCard from '../components/ProductCard';
 import { productsAPI } from '../lib/api';
@@ -11,11 +11,16 @@ import { TIKTOK_URL, WHATSAPP_LINK } from '../lib/whatsapp';
 import { DISPLAY_PHONE_NUMBER } from '../lib/site';
 
 const CATEGORIES = [
-  { label: 'Footwear', icon: '👟', href: '/shop?category=footwear' },
-  { label: 'Outerwear', icon: '🧥', href: '/shop?category=outerwear' },
-  { label: 'Accessories', icon: '🛍️', href: '/shop?category=accessories' },
-  { label: 'Collectibles', icon: '🏆', href: '/shop?category=collectibles' },
+  { label: 'Footwear', eyebrow: 'Step out', href: '/shop?category=footwear', mark: '01' },
+  { label: 'Outerwear', eyebrow: 'Layer up', href: '/shop?category=outerwear', mark: '02' },
+  { label: 'Accessories', eyebrow: 'Finish the look', href: '/shop?category=accessories', mark: '03' },
+  { label: 'Collectibles', eyebrow: 'Own the rare', href: '/shop?category=collectibles', mark: '04' },
 ];
+
+const reveal = {
+  hidden: { opacity: 0, y: 22 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.55 } },
+};
 
 export default function Home() {
   const [featured, setFeatured] = useState([]);
@@ -23,41 +28,216 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all([productsAPI.getFeatured(), productsAPI.getAll({ sort: 'newest', limit: 8 })])
-      .then(([featRes, newRes]) => { setFeatured(featRes.data); setNewArrivals(newRes.data.products); })
-      .catch(console.error).finally(() => setLoading(false));
+    Promise.all([
+      productsAPI.getFeatured(),
+      productsAPI.getAll({ sort: 'newest', limit: 8 }),
+    ])
+      .then(([featRes, newRes]) => {
+        setFeatured(featRes.data || []);
+        setNewArrivals(newRes.data?.products || []);
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false));
   }, []);
+
+  const heroProduct = featured[0] || newArrivals[0];
+  const heroImage = heroProduct?.images?.[0]?.url;
 
   return (
     <>
-      <Head><title>Nicky Collections 🛍️ — Fashion Promoted on TikTok</title><meta name="description" content="Shop the latest fashion drops from Nicky Collections. Shoes, jackets, accessories and more. Order via WhatsApp!" /><meta property="og:title" content="Nicky Collections — TikTok Fashion Store" /></Head>
+      <Head>
+        <title>Nicky Collections — Fashion Without Limits</title>
+        <meta name="description" content="Discover fashion-forward footwear, outerwear, accessories and collectibles from Nicky Collections. Shop new arrivals and order directly via WhatsApp." />
+        <meta property="og:title" content="Nicky Collections — Fashion Without Limits" />
+        <meta property="og:description" content="Fashion-forward drops, hand-picked for your next look." />
+      </Head>
 
-      <section className="relative min-h-screen flex items-center overflow-hidden bg-brand-dark">
-        <div className="absolute inset-0 pointer-events-none"><div className="absolute top-0 left-1/4 w-[600px] h-[600px] rounded-full bg-brand-pink/5 blur-[120px]" /><div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] rounded-full bg-brand-gold/5 blur-[100px]" /></div>
-        <div className="max-w-7xl mx-auto px-6 md:px-8 pt-16 w-full"><div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center min-h-[80vh]">
-          <motion.div initial={{ opacity: 0, x: -40 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.8 }}>
-            <motion.p className="label-tag text-brand-pink mb-4 flex items-center gap-2" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}><FaTiktok size={12} /> As seen on TikTok</motion.p>
-            <motion.h1 className="font-display font-light text-5xl md:text-7xl lg:text-8xl text-brand-light leading-none mb-6" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>Style<br /><span className="italic text-brand-pink">Without</span><br />Limits</motion.h1>
-            <motion.p className="font-body text-brand-gray text-lg leading-relaxed mb-10 max-w-md" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}>Discover exclusive fashion drops — sneakers, jackets, accessories and more. All hand-picked and promoted on TikTok. Order directly via WhatsApp.</motion.p>
-            <motion.div className="flex flex-wrap gap-4" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}><Link href="/shop" className="btn-primary flex items-center gap-2">Shop Now <FiArrowRight size={16} /></Link><a href={WHATSAPP_LINK} target="_blank" rel="noreferrer" className="btn-outline flex items-center gap-2"><FaWhatsapp size={16} /> Order via WhatsApp</a></motion.div>
-            <motion.div className="flex gap-10 mt-12 pt-10 border-t border-white/10" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }}>{[{ val: '500+', label: 'Happy Customers' }, { val: '100+', label: 'Products Listed' }, { val: '24/7', label: 'WhatsApp Support' }].map(stat => <div key={stat.label}><div className="font-display text-3xl font-medium text-brand-light">{stat.val}</div><div className="label-tag mt-1">{stat.label}</div></div>)}</motion.div>
+      <main>
+        <section className="relative min-h-[calc(100vh-72px)] overflow-hidden bg-brand-dark border-b border-white/5">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_70%_35%,rgba(255,31,109,0.12),transparent_30%),radial-gradient(circle_at_30%_80%,rgba(212,168,67,0.08),transparent_28%)]" />
+          <div className="relative mx-auto grid min-h-[calc(100vh-72px)] max-w-7xl items-center gap-12 px-6 py-20 md:px-8 lg:grid-cols-[1.05fr_.95fr] lg:gap-20 lg:py-16">
+            <motion.div initial="hidden" animate="show" variants={reveal} className="max-w-2xl">
+              <p className="mb-5 flex items-center gap-2 font-body text-[10px] font-semibold uppercase tracking-[0.28em] text-brand-pink">
+                <FaTiktok size={12} /> Curated on TikTok
+              </p>
+              <h1 className="font-display text-6xl font-light leading-[0.86] tracking-tight text-brand-light sm:text-7xl md:text-8xl lg:text-[7.5rem]">
+                Style
+                <br />
+                <span className="italic text-brand-pink">without</span>
+                <br />
+                limits.
+              </h1>
+              <p className="mt-8 max-w-lg font-body text-base leading-7 text-brand-gray md:text-lg">
+                Hand-picked footwear, outerwear, accessories and collectibles for people who want their everyday look to feel anything but ordinary.
+              </p>
+              <div className="mt-9 flex flex-wrap gap-3">
+                <Link href="/shop" className="btn-primary inline-flex items-center gap-2">
+                  Explore collection <FiArrowRight size={15} />
+                </Link>
+                <a href={WHATSAPP_LINK} target="_blank" rel="noreferrer" className="btn-outline inline-flex items-center gap-2">
+                  <FaWhatsapp size={15} /> Order on WhatsApp
+                </a>
+              </div>
+              <div className="mt-12 grid max-w-xl grid-cols-3 border-t border-white/10 pt-7">
+                {[['500+', 'Customers'], ['100+', 'Pieces listed'], ['24/7', 'Direct support']].map(([value, label]) => (
+                  <div key={label}>
+                    <div className="font-display text-3xl text-brand-light md:text-4xl">{value}</div>
+                    <div className="mt-1 font-body text-[9px] uppercase tracking-[0.18em] text-brand-gray">{label}</div>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.97, x: 25 }}
+              animate={{ opacity: 1, scale: 1, x: 0 }}
+              transition={{ duration: 0.8, delay: 0.15 }}
+              className="relative mx-auto w-full max-w-[590px]"
+            >
+              <div className="relative aspect-[4/5] overflow-hidden border border-white/10 bg-brand-card">
+                {heroImage ? (
+                  <Image
+                    src={heroImage}
+                    alt={heroProduct?.images?.[0]?.alt || heroProduct?.name || 'Nicky Collections fashion'}
+                    fill
+                    priority
+                    sizes="(max-width: 1023px) 90vw, 48vw"
+                    className="object-cover"
+                  />
+                ) : (
+                  <div className="absolute inset-0 flex items-center justify-center bg-[radial-gradient(circle_at_center,rgba(255,31,109,0.12),transparent_48%)]">
+                    <span className="font-display text-[8rem] font-light tracking-tighter text-white/10 md:text-[12rem]">NC</span>
+                  </div>
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-brand-dark/80 via-transparent to-brand-dark/5" />
+                <div className="absolute inset-5 border border-white/15 pointer-events-none" />
+                <div className="absolute bottom-6 left-6 right-6 flex items-end justify-between gap-5">
+                  <div>
+                    <p className="font-body text-[9px] font-semibold uppercase tracking-[0.22em] text-brand-pink">The edit</p>
+                    <p className="mt-1 max-w-xs font-display text-2xl leading-none text-white md:text-3xl">
+                      {heroProduct?.name || 'Your next statement piece'}
+                    </p>
+                  </div>
+                  {heroProduct && (
+                    <Link href={`/product/${heroProduct.slug || heroProduct._id}`} aria-label={`Shop ${heroProduct.name}`} className="flex h-11 w-11 shrink-0 items-center justify-center bg-white text-brand-dark transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink">
+                      <FiArrowUpRight size={18} />
+                    </Link>
+                  )}
+                </div>
+              </div>
+              <div className="absolute -bottom-4 -left-4 hidden border border-brand-gold/30 bg-brand-dark/90 px-4 py-3 backdrop-blur-md sm:block">
+                <p className="font-body text-[9px] uppercase tracking-[0.2em] text-brand-gold">New drops</p>
+                <p className="mt-1 font-body text-xs text-brand-light">Every week on TikTok</p>
+              </div>
+            </motion.div>
+          </div>
+          <a href="#discover" className="absolute bottom-7 left-1/2 hidden -translate-x-1/2 items-center gap-2 font-body text-[9px] uppercase tracking-[0.25em] text-brand-gray transition-colors hover:text-white md:flex">
+            Scroll to discover <FiChevronDown />
+          </a>
+        </section>
+
+        <section id="discover" className="mx-auto max-w-7xl px-6 py-20 md:px-8 md:py-28">
+          <motion.div initial="hidden" whileInView="show" viewport={{ once: true, margin: '-80px' }} variants={reveal} className="mb-10 flex items-end justify-between gap-6">
+            <div>
+              <p className="label-tag text-brand-pink mb-3">Start here</p>
+              <h2 className="section-title">Shop by mood.</h2>
+            </div>
+            <Link href="/shop" className="hidden items-center gap-2 font-body text-xs font-semibold uppercase tracking-[0.15em] text-brand-gray transition-colors hover:text-white sm:flex">View all <FiArrowRight /></Link>
           </motion.div>
-          <motion.div className="relative hidden lg:block" initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.8, delay: 0.2 }}><div className="relative w-full aspect-square max-w-[560px] mx-auto"><div className="absolute inset-0 border border-brand-pink/20 rounded-none" /><div className="absolute inset-4 border border-brand-gold/10 rounded-none" /><div className="absolute inset-0 flex items-center justify-center"><div className="text-center"><div className="font-display text-[10rem] font-light text-brand-light/5 leading-none select-none">NC</div><div className="font-body text-xs tracking-[0.5em] uppercase text-brand-pink mt-4">Collections</div></div></div><motion.div animate={{ y: [0, -8, 0] }} transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }} className="absolute top-8 right-8 glass-card px-4 py-3"><p className="label-tag text-brand-gold">New Drop</p><p className="font-body text-sm font-semibold text-brand-light mt-1">Nike Mind 001</p></motion.div><motion.div animate={{ y: [0, 8, 0] }} transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }} className="absolute bottom-12 left-8 glass-card px-4 py-3"><p className="label-tag text-green-400 flex items-center gap-1"><FaWhatsapp size={10} /> Fast Order</p><p className="font-body text-sm font-semibold text-brand-light mt-1">WhatsApp Ready</p></motion.div></div></motion.div>
-        </div></div>
-        <a href={TIKTOK_URL} target="_blank" rel="noreferrer" className="absolute bottom-10 left-1/2 -translate-x-1/2 flex items-center gap-3 glass-card px-5 py-3 hover:border-brand-pink/30 transition-all"><FaTiktok size={14} className="text-brand-pink" /><span className="font-body text-xs tracking-widest uppercase text-brand-gray">Follow @shopwithnickycollections</span></a>
-      </section>
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
+            {CATEGORIES.map((category, index) => (
+              <motion.div key={category.label} initial="hidden" whileInView="show" viewport={{ once: true, margin: '-50px' }} variants={reveal} transition={{ delay: index * 0.06 }}>
+                <Link href={category.href} className="group relative block min-h-[190px] overflow-hidden border border-white/5 bg-brand-card p-5 transition-all duration-300 hover:-translate-y-1 hover:border-brand-pink/40 md:min-h-[270px] md:p-7">
+                  <span className="font-body text-[9px] tracking-[0.2em] text-brand-gray">{category.mark}</span>
+                  <div className="absolute inset-x-5 bottom-5 md:inset-x-7 md:bottom-7">
+                    <p className="mb-1 font-body text-[9px] uppercase tracking-[0.18em] text-brand-pink">{category.eyebrow}</p>
+                    <h3 className="font-display text-2xl font-medium text-brand-light md:text-3xl">{category.label}</h3>
+                    <span className="mt-4 inline-flex h-8 w-8 items-center justify-center border border-white/10 text-brand-gray transition-all group-hover:border-brand-pink group-hover:text-brand-pink">
+                      <FiArrowUpRight size={13} />
+                    </span>
+                  </div>
+                  <span className="absolute -right-4 -top-7 font-display text-[9rem] leading-none text-white/[0.025] transition-transform duration-500 group-hover:translate-x-2">{category.mark}</span>
+                </Link>
+              </motion.div>
+            ))}
+          </div>
+        </section>
 
-      <section className="py-20 px-6 md:px-8 max-w-7xl mx-auto"><div className="flex items-end justify-between mb-12"><div><p className="label-tag text-brand-pink mb-3">Browse By</p><h2 className="section-title">Categories</h2></div></div><div className="grid grid-cols-2 md:grid-cols-4 gap-4">{CATEGORIES.map((cat, i) => <motion.div key={cat.label} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}><Link href={cat.href} className="block bg-brand-card border border-white/5 hover:border-brand-pink/50 p-8 text-center group transition-all duration-300 hover:-translate-y-1"><div className="text-4xl mb-4">{cat.icon}</div><h3 className="font-body text-sm tracking-widest uppercase text-brand-gray group-hover:text-brand-light transition-colors">{cat.label}</h3></Link></motion.div>)}</div></section>
+        {featured.length > 0 && (
+          <section className="border-y border-white/5 bg-brand-card/40">
+            <div className="mx-auto max-w-7xl px-6 py-20 md:px-8 md:py-28">
+              <div className="mb-10 flex items-end justify-between gap-6">
+                <div>
+                  <p className="label-tag mb-3 text-brand-pink">The edit</p>
+                  <h2 className="section-title">Featured pieces.</h2>
+                  <p className="mt-3 max-w-md font-body text-sm leading-6 text-brand-gray">A tighter selection of pieces worth stopping for.</p>
+                </div>
+                <Link href="/shop?featured=true" className="btn-outline hidden text-xs sm:inline-flex">View all <FiArrowRight className="ml-2" size={12} /></Link>
+              </div>
+              <div className="grid grid-cols-2 gap-4 md:grid-cols-3 md:gap-6 lg:grid-cols-4">
+                {featured.slice(0, 4).map((product, index) => <ProductCard key={product._id} product={product} index={index} />)}
+              </div>
+            </div>
+          </section>
+        )}
 
-      {featured.length > 0 && <section className="py-20 px-6 md:px-8 max-w-7xl mx-auto"><div className="flex items-end justify-between mb-12"><div><p className="label-tag text-brand-pink mb-3">Hand-Picked</p><h2 className="section-title">Featured</h2></div><Link href="/shop?featured=true" className="btn-outline text-xs">View All <FiArrowRight className="inline ml-2" size={12} /></Link></div><div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">{featured.slice(0, 4).map((product, i) => <ProductCard key={product._id} product={product} index={i} />)}</div></section>}
+        <section className="mx-auto max-w-7xl px-6 py-12 md:px-8 md:py-20">
+          <div className="relative overflow-hidden bg-brand-pink px-7 py-14 md:px-12 md:py-20">
+            <div className="pointer-events-none absolute -right-20 -top-24 h-72 w-72 rounded-full border-[60px] border-white/10" />
+            <div className="pointer-events-none absolute -bottom-32 -left-20 h-72 w-72 rounded-full border-[50px] border-white/10" />
+            <div className="relative flex flex-col justify-between gap-8 md:flex-row md:items-end">
+              <div>
+                <p className="font-body text-[10px] font-semibold uppercase tracking-[0.25em] text-white/70">Stay in the loop</p>
+                <h2 className="mt-3 max-w-xl font-display text-4xl font-light leading-none text-white md:text-6xl">The next drop starts here.</h2>
+                <p className="mt-5 max-w-md font-body text-sm leading-6 text-white/80">New pieces and styling inspiration land on TikTok first. Follow along and catch the next release.</p>
+              </div>
+              <a href={TIKTOK_URL} target="_blank" rel="noreferrer" className="inline-flex shrink-0 items-center justify-center gap-2 bg-white px-6 py-3.5 font-body text-xs font-bold uppercase tracking-[0.16em] text-brand-pink transition-colors hover:bg-brand-dark hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white">
+                <FaTiktok size={14} /> Follow on TikTok
+              </a>
+            </div>
+          </div>
+        </section>
 
-      <section className="my-12 mx-6 md:mx-8 max-w-7xl lg:mx-auto bg-brand-pink relative overflow-hidden"><div className="absolute inset-0 opacity-10"><div className="absolute top-0 right-0 w-64 h-64 bg-white rounded-full translate-x-1/3 -translate-y-1/3" /><div className="absolute bottom-0 left-0 w-48 h-48 bg-white rounded-full -translate-x-1/3 translate-y-1/3" /></div><div className="relative px-10 py-16 flex flex-col md:flex-row items-center justify-between gap-8"><div><p className="font-body text-white/70 text-sm tracking-widest uppercase mb-3">Limited Time</p><h2 className="font-display text-4xl md:text-5xl font-light text-white">TikTok Weekly Drops</h2><p className="font-body text-white/80 mt-3 max-w-md">New exclusive pieces every Friday. Follow us on TikTok to never miss a drop.</p></div><div className="flex gap-4 shrink-0"><a href={TIKTOK_URL} target="_blank" rel="noreferrer" className="bg-white text-brand-pink font-body font-semibold text-sm tracking-widest uppercase px-6 py-3 flex items-center gap-2 hover:bg-brand-dark hover:text-white transition-all"><FaTiktok size={14} /> Follow on TikTok</a></div></div></section>
+        {newArrivals.length > 0 && (
+          <section className="mx-auto max-w-7xl px-6 py-20 md:px-8 md:py-28">
+            <div className="mb-10 flex items-end justify-between gap-6">
+              <div>
+                <p className="label-tag mb-3 text-brand-gold">Just landed</p>
+                <h2 className="section-title">New arrivals.</h2>
+              </div>
+              <Link href="/shop?sort=newest" className="btn-outline hidden text-xs sm:inline-flex">See all <FiArrowRight className="ml-2" size={12} /></Link>
+            </div>
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-3 md:gap-6 lg:grid-cols-4">
+              {newArrivals.slice(0, 8).map((product, index) => <ProductCard key={product._id} product={product} index={index} />)}
+            </div>
+          </section>
+        )}
 
-      {newArrivals.length > 0 && <section className="py-20 px-6 md:px-8 max-w-7xl mx-auto"><div className="flex items-end justify-between mb-12"><div><p className="label-tag text-brand-gold mb-3">Just In</p><h2 className="section-title">New Arrivals</h2></div><Link href="/shop?sort=newest" className="btn-outline text-xs">See All <FiArrowRight className="inline ml-2" size={12} /></Link></div><div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">{newArrivals.slice(0, 8).map((product, i) => <ProductCard key={product._id} product={product} index={i} />)}</div></section>}
+        {!loading && newArrivals.length === 0 && (
+          <section className="mx-auto max-w-2xl px-6 py-28 text-center">
+            <div className="mx-auto mb-7 flex h-16 w-16 items-center justify-center border border-white/10 bg-brand-card font-display text-2xl text-brand-pink">NC</div>
+            <h2 className="font-display text-4xl text-brand-light">The collection is loading.</h2>
+            <p className="mx-auto mt-4 max-w-md font-body text-sm leading-6 text-brand-gray">Check back soon or reach out directly and we&apos;ll help you find your next piece.</p>
+            <a href={WHATSAPP_LINK} target="_blank" rel="noreferrer" className="btn-primary mt-8 inline-flex items-center gap-2"><FaWhatsapp size={16} /> Chat with us</a>
+          </section>
+        )}
 
-      {!loading && newArrivals.length === 0 && <section className="py-32 text-center px-6"><div className="max-w-md mx-auto"><div className="text-6xl mb-6">🛍️</div><h2 className="font-display text-4xl text-brand-light mb-4">Coming Soon</h2><p className="font-body text-brand-gray mb-8">We're loading up with amazing products. Check back soon or contact us on WhatsApp!</p><a href={WHATSAPP_LINK} target="_blank" rel="noreferrer" className="btn-primary inline-flex items-center gap-2"><FaWhatsapp size={16} /> Chat with Us</a></div></section>}
-
-      <section className="py-20 px-6 md:px-8 max-w-7xl mx-auto"><div className="glass-card p-12 md:p-20 text-center relative overflow-hidden"><div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-transparent pointer-events-none" /><FaWhatsapp size={48} className="text-green-400 mx-auto mb-6" /><h2 className="section-title mb-4">Order Directly on WhatsApp</h2><p className="font-body text-brand-gray text-lg max-w-xl mx-auto mb-10">See something you like? Just tap a product and click "Order on WhatsApp" for instant personal service and fast delivery.</p><div className="flex flex-wrap gap-4 justify-center"><a href={WHATSAPP_LINK} target="_blank" rel="noreferrer" className="bg-green-500 hover:bg-green-400 text-white font-body font-semibold text-sm tracking-widest uppercase px-8 py-4 flex items-center gap-3 transition-colors"><FaWhatsapp size={18} /> {DISPLAY_PHONE_NUMBER}</a><Link href="/shop" className="btn-outline">Browse Products</Link></div></div></section>
+        <section className="mx-auto max-w-7xl px-6 pb-24 pt-8 md:px-8 md:pb-32">
+          <div className="glass-card relative overflow-hidden p-8 text-center md:p-14">
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(34,197,94,0.06),transparent_55%)]" />
+            <div className="relative">
+              <FaWhatsapp size={38} className="mx-auto mb-5 text-green-400" />
+              <p className="label-tag mb-3 text-green-400">Personal service</p>
+              <h2 className="section-title">See it. Want it. Order it.</h2>
+              <p className="mx-auto mt-4 max-w-xl font-body text-sm leading-6 text-brand-gray md:text-base">Tap any product, then order directly on WhatsApp for personal assistance and fast delivery.</p>
+              <div className="mt-8 flex flex-wrap justify-center gap-3">
+                <a href={WHATSAPP_LINK} target="_blank" rel="noreferrer" className="inline-flex items-center gap-3 bg-green-500 px-7 py-3.5 font-body text-xs font-bold uppercase tracking-[0.14em] text-white transition-colors hover:bg-green-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-300"> <FaWhatsapp size={16} /> {DISPLAY_PHONE_NUMBER}</a>
+                <Link href="/shop" className="btn-outline">Browse products</Link>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
     </>
   );
 }
