@@ -4,7 +4,7 @@ import { useRouter } from 'next/router';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { FiStar, FiHeart, FiShare2, FiArrowLeft, FiCheck } from 'react-icons/fi';
+import { FiStar, FiHeart, FiShare2, FiArrowLeft, FiCheck, FiShield, FiTruck, FiMessageCircle } from 'react-icons/fi';
 import { FaWhatsapp, FaTiktok } from 'react-icons/fa';
 import { productsAPI, usersAPI } from '../../lib/api';
 import { orderOnWhatsApp, TIKTOK_URL } from '../../lib/whatsapp';
@@ -46,13 +46,21 @@ export default function ProductDetail() {
     try {
       const res = await usersAPI.toggleWishlist(product._id);
       setWishlisted(res.data.added);
-      toast.success(res.data.added ? 'Added to wishlist ❤️' : 'Removed from wishlist');
+      toast.success(res.data.added ? 'Added to wishlist' : 'Removed from wishlist');
     } catch { toast.error('Something went wrong'); }
   };
 
-  const handleShare = () => {
-    if (navigator.share) navigator.share({ title: product.name, url: window.location.href });
-    else { navigator.clipboard.writeText(window.location.href); toast.success('Link copied!'); }
+  const handleShare = async () => {
+    if (!product || typeof window === 'undefined') return;
+    try {
+      if (navigator.share) await navigator.share({ title: product.name, url: window.location.href });
+      else {
+        await navigator.clipboard.writeText(window.location.href);
+        toast.success('Product link copied');
+      }
+    } catch (error) {
+      if (error?.name !== 'AbortError') toast.error('Unable to share this product');
+    }
   };
 
   const submitReview = async (e) => {
@@ -62,7 +70,7 @@ export default function ProductDetail() {
     setSubmittingReview(true);
     try {
       await productsAPI.addReview(product._id, { rating: reviewRating, comment: reviewComment });
-      toast.success('Review submitted!');
+      toast.success('Review submitted');
       setReviewComment('');
       const res = await productsAPI.getOne(product._id);
       setProduct(res.data);
@@ -70,63 +78,98 @@ export default function ProductDetail() {
     finally { setSubmittingReview(false); }
   };
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center"><div className="w-8 h-8 border-2 border-brand-pink border-t-transparent rounded-full animate-spin" /></div>;
+  if (loading) return <div className="min-h-screen flex items-center justify-center px-6"><div className="text-center"><div className="w-10 h-10 border-2 border-brand-pink border-t-transparent rounded-full animate-spin mx-auto mb-4" /><p className="label-tag">Loading product</p></div></div>;
   if (!product) return null;
 
   const discount = product.comparePrice && product.comparePrice > product.price ? Math.round(((product.comparePrice - product.price) / product.comparePrice) * 100) : null;
+  const hasImages = product.images?.length > 0;
+  const selectedImageUrl = product.images?.[selectedImage]?.url;
+  const rating = Math.round(Number(product.rating) || 0);
 
   return (
     <>
       <Head>
         <title>{product.name} — Nicky Collections</title>
-        <meta name="description" content={product.description?.slice(0, 160)} />
+        <meta name="description" content={product.description?.slice(0, 160) || `Shop ${product.name} from Nicky Collections.`} />
+        <meta property="og:title" content={`${product.name} — Nicky Collections`} />
+        {product.description && <meta property="og:description" content={product.description.slice(0, 160)} />}
+        {selectedImageUrl && <meta property="og:image" content={selectedImageUrl} />}
       </Head>
       <ProductStructuredData product={product} />
 
-      <div className="max-w-7xl mx-auto px-6 md:px-8 pt-20 pb-20">
-        <div className="flex items-center gap-2 mb-10">
-          <Link href="/shop" className="label-tag hover:text-brand-light transition-colors flex items-center gap-1"><FiArrowLeft size={12} />Shop</Link>
-          <span className="text-brand-gray/40">/</span><span className="label-tag text-brand-gray">{product.category}</span>
-          <span className="text-brand-gray/40">/</span><span className="label-tag text-brand-pink line-clamp-1 max-w-[200px]">{product.name}</span>
-        </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 pt-20 pb-28 lg:pb-20">
+        <nav aria-label="Breadcrumb" className="flex items-center gap-2 mb-8 overflow-hidden">
+          <Link href="/shop" className="label-tag hover:text-brand-light transition-colors flex items-center gap-1 shrink-0"><FiArrowLeft size={12} /> Shop</Link>
+          <span className="text-brand-gray/40" aria-hidden="true">/</span>
+          <Link href={`/shop?category=${encodeURIComponent(product.category || '')}`} className="label-tag text-brand-gray hover:text-brand-light transition-colors shrink-0">{product.category}</Link>
+          <span className="text-brand-gray/40" aria-hidden="true">/</span>
+          <span className="label-tag text-brand-pink truncate">{product.name}</span>
+        </nav>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.15fr)_minmax(380px,0.85fr)] gap-10 xl:gap-16 items-start">
           <div className="space-y-4">
-            <motion.div className="relative aspect-square overflow-hidden bg-brand-card" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-              {product.images?.[selectedImage] ? <Image src={product.images[selectedImage].url} alt={product.name} fill className="object-cover" priority /> : <div className="w-full h-full flex items-center justify-center text-brand-gray"><span className="text-6xl">👟</span></div>}
-              {discount && <div className="absolute top-4 left-4 bg-brand-pink text-white font-body font-bold text-xs px-3 py-1 tracking-widest uppercase">-{discount}%</div>}
+            <motion.div className="relative aspect-[4/5] overflow-hidden bg-brand-card border border-white/5" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }}>
+              {hasImages ? <Image src={selectedImageUrl} alt={product.images[selectedImage]?.alt || product.name} fill className="object-cover" priority sizes="(max-width: 1024px) 100vw, 58vw" /> : <div className="w-full h-full flex items-center justify-center text-brand-gray"><span className="text-6xl" aria-hidden="true">◌</span><span className="sr-only">No product image available</span></div>}
+              <div className="absolute inset-x-0 top-0 flex items-start justify-between p-4 pointer-events-none">
+                {discount ? <span className="bg-brand-pink text-white font-body font-bold text-xs px-3 py-1.5 tracking-widest uppercase">-{discount}%</span> : <span />}
+                {product.isNewArrival && <span className="bg-brand-light text-brand-dark font-body font-semibold text-xs px-3 py-1.5 tracking-widest uppercase">New arrival</span>}
+              </div>
             </motion.div>
-            {product.images?.length > 1 && <div className="flex gap-3 overflow-x-auto pb-2">{product.images.map((img, i) => <button key={i} onClick={() => setSelectedImage(i)} className={`relative w-20 h-20 shrink-0 overflow-hidden border-2 transition-all ${selectedImage === i ? 'border-brand-pink' : 'border-white/10 hover:border-white/30'}`}><Image src={img.url} alt="" fill className="object-cover" /></button>)}</div>}
-            {product.videos?.length > 0 && <div className="space-y-3">{product.videos.map((video, i) => <video key={i} src={video.url} controls className="w-full bg-brand-card" />)}</div>}
+
+            {hasImages && <div className="flex gap-3 overflow-x-auto pb-2" role="list" aria-label="Product images">{product.images.map((img, i) => <button key={i} type="button" onClick={() => setSelectedImage(i)} aria-label={`View product image ${i + 1}`} aria-current={selectedImage === i ? 'true' : undefined} className={`relative w-20 h-24 sm:w-24 sm:h-28 shrink-0 overflow-hidden border-2 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink ${selectedImage === i ? 'border-brand-pink' : 'border-white/10 hover:border-white/30'}`}><Image src={img.url} alt="" fill sizes="96px" className="object-cover" /></button>)}</div>}
+
+            {product.videos?.length > 0 && <div className="space-y-3 pt-2"><p className="label-tag">Product video</p>{product.videos.map((video, i) => <video key={i} src={video.url} controls preload="metadata" className="w-full bg-brand-card border border-white/5" aria-label={`${product.name} video ${i + 1}`} />)}</div>}
           </div>
 
-          <div>
-            <div className="flex items-center gap-3 mb-4">{product.brand && <span className="label-tag text-brand-pink">{product.brand}</span>}<span className="label-tag">/ {product.category}</span>{product.isNewArrival && <span className="bg-brand-pink text-white text-[10px] tracking-widest uppercase px-2 py-1 font-body">New</span>}</div>
-            <h1 className="font-display text-3xl md:text-4xl font-light text-brand-light leading-tight mb-4">{product.name}</h1>
+          <div className="lg:sticky lg:top-28">
+            <div className="glass-card p-5 sm:p-7 md:p-8">
+              <div className="flex flex-wrap items-center gap-2 mb-4">{product.brand && <span className="label-tag text-brand-pink">{product.brand}</span>}<span className="label-tag text-brand-gray">/ {product.category}</span>{product.isFeatured && <span className="label-tag text-brand-gold">Featured</span>}</div>
+              <h1 className="font-display text-4xl md:text-5xl font-light text-brand-light leading-[0.95] mb-5">{product.name}</h1>
 
-            {product.numReviews > 0 && <div className="flex items-center gap-2 mb-6"><div className="flex gap-1">{[...Array(5)].map((_, i) => <FiStar key={i} size={14} fill={i < Math.round(product.rating) ? '#D4A843' : 'none'} className={i < Math.round(product.rating) ? 'text-brand-gold' : 'text-brand-gray'} />)}</div><span className="font-body text-sm text-brand-gray">({product.numReviews} reviews)</span></div>}
+              {product.numReviews > 0 && <a href="#reviews" onClick={() => setActiveTab('reviews')} className="inline-flex items-center gap-2 mb-6 group"><span className="flex gap-1" aria-label={`${product.rating} out of 5 stars`}>{[...Array(5)].map((_, i) => <FiStar key={i} size={14} fill={i < rating ? 'currentColor' : 'none'} className={i < rating ? 'text-brand-gold' : 'text-brand-gray'} />)}</span><span className="font-body text-sm text-brand-gray group-hover:text-brand-light transition-colors">{product.rating?.toFixed?.(1) || product.rating} · {product.numReviews} reviews</span></a>}
 
-            <div className="flex items-baseline gap-4 mb-8"><span className="font-display text-4xl font-medium text-brand-light">${product.price.toFixed(2)}</span>{product.comparePrice && product.comparePrice > product.price && <span className="font-body text-lg text-brand-gray line-through">${product.comparePrice.toFixed(2)}</span>}</div>
+              <div className="flex items-baseline gap-4 mb-7"><span className="font-display text-4xl md:text-5xl font-medium text-brand-light">${product.price.toFixed(2)}</span>{product.comparePrice && product.comparePrice > product.price && <span className="font-body text-base text-brand-gray line-through">${product.comparePrice.toFixed(2)}</span>}{discount && <span className="label-tag text-brand-pink">Save {discount}%</span>}</div>
 
-            {product.colors?.length > 0 && <div className="mb-6"><p className="label-tag text-brand-light mb-3">Color: <span className="text-brand-gray">{selectedColor}</span></p><div className="flex flex-wrap gap-2">{product.colors.map(color => <button key={color} onClick={() => setSelectedColor(color)} className={`px-4 py-2 font-body text-xs tracking-widest uppercase border transition-all ${selectedColor === color ? 'border-brand-pink text-brand-pink bg-brand-pink/10' : 'border-white/10 text-brand-gray hover:border-white/30'}`}>{color}</button>)}</div></div>}
+              <div className="h-px bg-white/10 mb-7" />
 
-            {product.sizes?.length > 0 && <div className="mb-8"><p className="label-tag text-brand-light mb-3">Size: <span className="text-brand-gray">{selectedSize}</span></p><div className="flex flex-wrap gap-2">{product.sizes.map(size => <button key={size} onClick={() => setSelectedSize(size)} className={`w-12 h-12 font-body text-sm border transition-all ${selectedSize === size ? 'border-brand-pink text-brand-pink bg-brand-pink/10' : 'border-white/10 text-brand-gray hover:border-white/30'}`}>{size}</button>)}</div></div>}
+              {product.colors?.length > 0 && <fieldset className="mb-6"><legend className="label-tag text-brand-light mb-3">Color: <span className="text-brand-gray normal-case tracking-normal">{selectedColor}</span></legend><div className="flex flex-wrap gap-2">{product.colors.map(color => <button key={color} type="button" onClick={() => setSelectedColor(color)} aria-pressed={selectedColor === color} className={`px-4 py-2.5 font-body text-xs tracking-widest uppercase border transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink ${selectedColor === color ? 'border-brand-pink text-brand-pink bg-brand-pink/10' : 'border-white/10 text-brand-gray hover:border-white/30'}`}>{color}</button>)}</div></fieldset>}
 
-            <div className={`flex items-center gap-2 mb-8 ${product.inStock ? 'text-green-400' : 'text-red-400'}`}><FiCheck size={14} /><span className="font-body text-sm tracking-widest uppercase">{product.inStock ? 'In Stock' : 'Out of Stock'}</span></div>
+              {product.sizes?.length > 0 && <fieldset className="mb-7"><legend className="label-tag text-brand-light mb-3">Size: <span className="text-brand-gray normal-case tracking-normal">{selectedSize}</span></legend><div className="flex flex-wrap gap-2">{product.sizes.map(size => <button key={size} type="button" onClick={() => setSelectedSize(size)} aria-pressed={selectedSize === size} className={`min-w-12 h-12 px-3 font-body text-sm border transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink ${selectedSize === size ? 'border-brand-pink text-brand-pink bg-brand-pink/10' : 'border-white/10 text-brand-gray hover:border-white/30'}`}>{size}</button>)}</div></fieldset>}
 
-            <div className="space-y-3 mb-8"><button onClick={handleOrder} disabled={!product.inStock} className="w-full bg-green-500 hover:bg-green-400 text-white font-body font-semibold text-sm tracking-widest uppercase py-4 flex items-center justify-center gap-3 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"><FaWhatsapp size={18} />Order on WhatsApp</button><div className="flex gap-3"><button onClick={handleWishlist} className={`flex-1 btn-outline flex items-center justify-center gap-2 ${wishlisted ? 'border-brand-pink text-brand-pink' : ''}`}><FiHeart size={16} fill={wishlisted ? 'currentColor' : 'none'} />{wishlisted ? 'Saved' : 'Wishlist'}</button><button onClick={handleShare} className="btn-outline flex items-center gap-2 px-4"><FiShare2 size={16} /></button></div></div>
+              <div className={`flex items-center justify-between gap-3 mb-7 p-3 border ${product.inStock ? 'border-green-400/20 bg-green-400/5 text-green-400' : 'border-red-400/20 bg-red-400/5 text-red-400'}`}><span className="flex items-center gap-2"><FiCheck size={14} /><span className="font-body text-xs tracking-widest uppercase">{product.inStock ? 'In stock' : 'Currently unavailable'}</span></span>{product.stockCount > 0 && product.stockCount <= 5 && <span className="font-body text-xs text-brand-gray">Only {product.stockCount} left</span>}</div>
 
-            {product.tiktokLink && <a href={product.tiktokLink} target="_blank" rel="noreferrer" className="flex items-center gap-2 text-sm text-brand-gray hover:text-brand-pink transition-colors mb-8"><FaTiktok size={14} className="text-brand-pink" /><span className="font-body text-xs tracking-widest uppercase">View on TikTok</span></a>}
-            {product.tags?.length > 0 && <div className="flex flex-wrap gap-2">{product.tags.map(tag => <span key={tag} className="font-body text-xs text-brand-gray border border-white/10 px-3 py-1">#{tag}</span>)}</div>}
+              <div className="space-y-3">
+                <button onClick={handleOrder} disabled={!product.inStock} className="w-full bg-green-500 hover:bg-green-400 text-white font-body font-semibold text-sm tracking-widest uppercase py-4 flex items-center justify-center gap-3 transition-all hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"><FaWhatsapp size={18} /> Order on WhatsApp</button>
+                <div className="grid grid-cols-[1fr_auto] gap-3"><button onClick={handleWishlist} className={`btn-outline flex items-center justify-center gap-2 ${wishlisted ? 'border-brand-pink text-brand-pink' : ''}`} aria-label={wishlisted ? 'Remove from wishlist' : 'Add to wishlist'}><FiHeart size={16} fill={wishlisted ? 'currentColor' : 'none'} />{wishlisted ? 'Saved' : 'Wishlist'}</button><button onClick={handleShare} className="btn-outline px-4" aria-label="Share product"><FiShare2 size={16} /></button></div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-2 mt-7 pt-7 border-t border-white/10">
+                <div className="text-center"><FiMessageCircle className="mx-auto mb-2 text-brand-pink" size={17} /><p className="font-body text-[10px] text-brand-gray uppercase tracking-wider">Direct chat</p></div>
+                <div className="text-center"><FiShield className="mx-auto mb-2 text-brand-gold" size={17} /><p className="font-body text-[10px] text-brand-gray uppercase tracking-wider">Personal service</p></div>
+                <div className="text-center"><FiTruck className="mx-auto mb-2 text-brand-light" size={17} /><p className="font-body text-[10px] text-brand-gray uppercase tracking-wider">Order support</p></div>
+              </div>
+            </div>
+
+            {product.tiktokLink && <a href={product.tiktokLink} target="_blank" rel="noreferrer" className="flex items-center justify-between mt-4 px-5 py-4 border border-white/10 hover:border-brand-pink/40 transition-colors"><span className="flex items-center gap-2 text-brand-gray"><FaTiktok size={14} className="text-brand-pink" /><span className="font-body text-xs tracking-widest uppercase">See this product on TikTok</span></span><span className="text-brand-gray">↗</span></a>}
+            {!product.tiktokLink && <a href={TIKTOK_URL} target="_blank" rel="noreferrer" className="flex items-center justify-between mt-4 px-5 py-4 border border-white/10 hover:border-brand-pink/40 transition-colors"><span className="flex items-center gap-2 text-brand-gray"><FaTiktok size={14} className="text-brand-pink" /><span className="font-body text-xs tracking-widest uppercase">Follow the latest drops</span></span><span className="text-brand-gray">↗</span></a>}
           </div>
         </div>
 
-        <div className="mt-16 border-t border-white/10 pt-12"><div className="flex gap-8 border-b border-white/10 mb-10">{['description', 'reviews'].map(tab => <button key={tab} onClick={() => setActiveTab(tab)} className={`pb-4 font-body text-sm tracking-widest uppercase border-b-2 transition-all -mb-[1px] ${activeTab === tab ? 'border-brand-pink text-brand-light' : 'border-transparent text-brand-gray'}`}>{tab} {tab === 'reviews' && `(${product.numReviews})`}</button>)}</div>
-          {activeTab === 'description' && <div className="max-w-3xl"><p className="font-body text-brand-gray leading-relaxed whitespace-pre-line">{product.description}</p></div>}
-          {activeTab === 'reviews' && <div className="max-w-3xl space-y-8">{product.reviews?.map(review => <div key={review._id} className="border-b border-white/10 pb-8"><div className="flex items-center justify-between mb-3"><div><p className="font-body text-sm font-semibold text-brand-light">{review.name}</p><div className="flex gap-1 mt-1">{[...Array(5)].map((_, i) => <FiStar key={i} size={11} fill={i < review.rating ? '#D4A843' : 'none'} className={i < review.rating ? 'text-brand-gold' : 'text-brand-gray'} />)}</div></div><span className="font-body text-xs text-brand-gray">{new Date(review.createdAt).toLocaleDateString()}</span></div><p className="font-body text-sm text-brand-gray">{review.comment}</p></div>)}
-            {user && <div className="glass-card p-6"><h3 className="label-tag text-brand-light mb-6">Write a Review</h3><form onSubmit={submitReview} className="space-y-4"><div><label className="label-tag mb-2 block">Rating</label><div className="flex gap-2">{[1,2,3,4,5].map(r => <button key={r} type="button" onClick={() => setReviewRating(r)}><FiStar size={22} fill={r <= reviewRating ? '#D4A843' : 'none'} className={r <= reviewRating ? 'text-brand-gold' : 'text-brand-gray hover:text-brand-gold'} /></button>)}</div></div><textarea value={reviewComment} onChange={e => setReviewComment(e.target.value)} placeholder="Share your experience..." rows={4} className="input-field resize-none w-full" /><button type="submit" disabled={submittingReview} className="btn-primary">{submittingReview ? 'Submitting...' : 'Submit Review'}</button></form></div>}
+        {product.tags?.length > 0 && <div className="mt-8 flex flex-wrap gap-2">{product.tags.map(tag => <span key={tag} className="font-body text-xs text-brand-gray border border-white/10 px-3 py-1.5">#{tag}</span>)}</div>}
+
+        <section className="mt-16 md:mt-24 border-t border-white/10 pt-10 md:pt-12" id="reviews">
+          <div className="flex gap-8 border-b border-white/10 mb-10 overflow-x-auto" role="tablist" aria-label="Product information">
+            {['description', 'reviews'].map(tab => <button key={tab} type="button" role="tab" aria-selected={activeTab === tab} onClick={() => setActiveTab(tab)} className={`pb-4 whitespace-nowrap font-body text-sm tracking-widest uppercase border-b-2 transition-all -mb-[1px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pink ${activeTab === tab ? 'border-brand-pink text-brand-light' : 'border-transparent text-brand-gray hover:text-brand-light'}`}>{tab} {tab === 'reviews' && `(${product.numReviews})`}</button>)}
+          </div>
+          {activeTab === 'description' && <div className="max-w-3xl"><p className="font-body text-brand-gray leading-8 whitespace-pre-line">{product.description || 'No description is available for this product yet.'}</p></div>}
+          {activeTab === 'reviews' && <div className="max-w-3xl space-y-8">{product.reviews?.length > 0 ? product.reviews.map(review => <article key={review._id} className="border-b border-white/10 pb-8"><div className="flex items-center justify-between gap-4 mb-3"><div><p className="font-body text-sm font-semibold text-brand-light">{review.name}</p><div className="flex gap-1 mt-1" aria-label={`${review.rating} out of 5 stars`}>{[...Array(5)].map((_, i) => <FiStar key={i} size={11} fill={i < review.rating ? 'currentColor' : 'none'} className={i < review.rating ? 'text-brand-gold' : 'text-brand-gray'} />)}</div></div><time dateTime={review.createdAt} className="font-body text-xs text-brand-gray">{new Date(review.createdAt).toLocaleDateString()}</time></div><p className="font-body text-sm text-brand-gray leading-7">{review.comment}</p></article>) : <p className="font-body text-brand-gray">No reviews yet. Be the first to share your experience.</p>}
+            {user && <div className="glass-card p-6 md:p-8"><h3 className="label-tag text-brand-light mb-6">Write a review</h3><form onSubmit={submitReview} className="space-y-5"><div><label className="label-tag mb-3 block">Rating</label><div className="flex gap-2">{[1,2,3,4,5].map(r => <button key={r} type="button" onClick={() => setReviewRating(r)} aria-label={`${r} star${r > 1 ? 's' : ''}`} aria-pressed={r === reviewRating}><FiStar size={22} fill={r <= reviewRating ? 'currentColor' : 'none'} className={r <= reviewRating ? 'text-brand-gold' : 'text-brand-gray hover:text-brand-gold'} /></button>)}</div></div><textarea value={reviewComment} onChange={e => setReviewComment(e.target.value)} placeholder="Share your experience..." rows={5} maxLength={1000} className="input-field resize-none w-full" aria-label="Review comment" /><div className="flex items-center justify-between gap-4"><span className="font-body text-xs text-brand-gray">{reviewComment.length}/1000</span><button type="submit" disabled={submittingReview} className="btn-primary">{submittingReview ? 'Submitting...' : 'Submit review'}</button></div></form></div>}
           </div>}
-        </div>
+        </section>
+      </div>
+
+      <div className="fixed inset-x-0 bottom-0 z-40 p-3 bg-brand-dark/95 backdrop-blur-xl border-t border-white/10 lg:hidden safe-area-bottom" aria-label="Mobile purchase actions">
+        <div className="max-w-7xl mx-auto grid grid-cols-[1fr_auto] gap-2"><button onClick={handleOrder} disabled={!product.inStock} className="bg-green-500 hover:bg-green-400 text-white font-body font-semibold text-xs tracking-widest uppercase py-3.5 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"><FaWhatsapp size={17} /> Order on WhatsApp</button><button onClick={handleWishlist} className="w-12 border border-white/10 flex items-center justify-center text-brand-light" aria-label={wishlisted ? 'Remove from wishlist' : 'Add to wishlist'}><FiHeart size={18} fill={wishlisted ? 'currentColor' : 'none'} className={wishlisted ? 'text-brand-pink' : ''} /></button></div>
       </div>
     </>
   );
