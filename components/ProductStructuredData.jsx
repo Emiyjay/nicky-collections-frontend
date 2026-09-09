@@ -11,15 +11,13 @@ export default function ProductStructuredData({ product }) {
   const image = product.images?.find((item) => clean(item?.url))?.url;
   const url = identifier ? `${SITE_URL}/product/${encodeURIComponent(identifier)}` : SITE_URL;
   const price = Number(product.price).toFixed(2);
-  const comparePrice = Number(product.comparePrice);
-  const hasSale = Number.isFinite(comparePrice) && comparePrice > Number(product.price);
   const reviews = Number(product.numReviews) || 0;
   const rating = Number(product.rating);
 
   const data = {
     '@context': 'https://schema.org',
     '@type': 'Product',
-    name: product.name,
+    name: clean(product.name),
     description: clean(product.description) || undefined,
     image: image ? [image] : undefined,
     url,
@@ -33,8 +31,6 @@ export default function ProductStructuredData({ product }) {
       availability: product.inStock
         ? 'https://schema.org/InStock'
         : 'https://schema.org/OutOfStock',
-      itemCondition: 'https://schema.org/NewCondition',
-      ...(hasSale ? { priceValidUntil: undefined } : {}),
     },
     ...(reviews > 0 && Number.isFinite(rating) && rating > 0
       ? {
