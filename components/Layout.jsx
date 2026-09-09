@@ -4,6 +4,7 @@ import Navbar from './Navbar';
 import Footer from './Footer';
 import SiteStructuredData from './SiteStructuredData';
 import ProductSEOBridge from './ProductSEOBridge';
+import RelatedProducts from './RelatedProducts';
 import { Toaster } from 'react-hot-toast';
 import { FaWhatsapp } from 'react-icons/fa';
 import { WHATSAPP_LINK } from '../lib/whatsapp';
@@ -24,6 +25,7 @@ export default function Layout({ children }) {
             </motion.div>
           </AnimatePresence>
         </main>
+        <RelatedProducts />
         <Footer />
         <a href={WHATSAPP_LINK} target="_blank" rel="noreferrer" aria-label="Chat with Nicky Collections on WhatsApp"
           className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-green-500 rounded-full flex items-center justify-center shadow-lg shadow-green-500/30 hover:bg-green-400 hover:scale-110 transition-all duration-300 animate-pulse-glow">
