@@ -2,10 +2,11 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiMenu, FiX, FiHeart, FiSun, FiMoon, FiSearch } from 'react-icons/fi';
-import { FaTiktok, FaWhatsapp } from 'react-icons/fa';
+import { FiMenu, FiX, FiHeart, FiSun, FiMoon, FiSearch, FiMail } from 'react-icons/fi';
+import { FaTiktok } from 'react-icons/fa';
 import { useAuth } from '../lib/AuthContext';
-import { TIKTOK_URL, WHATSAPP_LINK } from '../lib/whatsapp';
+import { TIKTOK_URL } from '../lib/whatsapp';
+import { CONTACT_EMAIL } from '../lib/site';
 
 export default function Navbar({ darkMode, toggleDarkMode }) {
   const [scrolled, setScrolled] = useState(false);
@@ -55,7 +56,7 @@ export default function Navbar({ darkMode, toggleDarkMode }) {
     <>
       <div className="bg-brand-pink py-2 overflow-hidden" aria-label="Store announcements">
         <div className="ticker-content text-white text-xs tracking-widest uppercase font-body font-medium" aria-hidden="true">
-          {Array(6).fill('✦ Free Shipping on Orders $100+ ✦ New Arrivals Weekly ✦ Order via WhatsApp ✦ TikTok Drops Every Friday ✦').map((t, i) => (
+          {Array(6).fill('✦ Free Shipping on Orders $100+ ✦ New Arrivals Weekly ✦ Order via Email ✦ TikTok Drops Every Friday ✦').map((t, i) => (
             <span key={i} className="px-8">{t}</span>
           ))}
         </div>
@@ -86,21 +87,15 @@ export default function Navbar({ darkMode, toggleDarkMode }) {
             </div>
 
             <div className="flex items-center gap-3 md:gap-4">
-              <button
-                type="button"
-                onClick={() => setSearchOpen(true)}
-                aria-label="Search products"
-                aria-haspopup="dialog"
-                className="p-2 text-brand-gray hover:text-brand-light transition-colors"
-              >
+              <button type="button" onClick={() => setSearchOpen(true)} aria-label="Search products" aria-haspopup="dialog" className="p-2 text-brand-gray hover:text-brand-light transition-colors">
                 <FiSearch size={18} aria-hidden="true" />
               </button>
 
               <a href={TIKTOK_URL} target="_blank" rel="noreferrer" aria-label="Nicky Collections on TikTok" className="p-2 text-brand-gray hover:text-brand-pink transition-colors hidden md:block">
                 <FaTiktok size={16} aria-hidden="true" />
               </a>
-              <a href={WHATSAPP_LINK} target="_blank" rel="noreferrer" aria-label="Chat with Nicky Collections on WhatsApp" className="p-2 text-brand-gray hover:text-green-400 transition-colors hidden md:block">
-                <FaWhatsapp size={18} aria-hidden="true" />
+              <a href={`mailto:${CONTACT_EMAIL}`} aria-label="Email Nicky Collections" className="p-2 text-brand-gray hover:text-brand-pink transition-colors hidden md:block">
+                <FiMail size={18} aria-hidden="true" />
               </a>
 
               {user ? (
@@ -131,13 +126,7 @@ export default function Navbar({ darkMode, toggleDarkMode }) {
 
         <AnimatePresence>
           {menuOpen && (
-            <motion.div
-              id="mobile-navigation"
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="md:hidden bg-brand-dark border-t border-white/10 px-6 py-6 space-y-4"
-            >
+            <motion.div id="mobile-navigation" initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="md:hidden bg-brand-dark border-t border-white/10 px-6 py-6 space-y-4">
               {navLinks.map(link => (
                 <Link key={link.href} href={link.href} onClick={closeMenu} aria-current={router.pathname === link.href ? 'page' : undefined} className="block font-body text-sm tracking-widest uppercase text-brand-gray hover:text-brand-light py-3 border-b border-white/5">
                   {link.label}
@@ -145,7 +134,7 @@ export default function Navbar({ darkMode, toggleDarkMode }) {
               ))}
               <div className="flex gap-4 pt-4">
                 <a href={TIKTOK_URL} target="_blank" rel="noreferrer" aria-label="Nicky Collections on TikTok" className="p-2 text-brand-gray hover:text-brand-pink"><FaTiktok size={20} aria-hidden="true" /></a>
-                <a href={WHATSAPP_LINK} target="_blank" rel="noreferrer" aria-label="Chat on WhatsApp" className="p-2 text-brand-gray hover:text-green-400"><FaWhatsapp size={20} aria-hidden="true" /></a>
+                <a href={`mailto:${CONTACT_EMAIL}`} aria-label="Email Nicky Collections" className="p-2 text-brand-gray hover:text-brand-pink"><FiMail size={20} aria-hidden="true" /></a>
               </div>
             </motion.div>
           )}
@@ -154,15 +143,7 @@ export default function Navbar({ darkMode, toggleDarkMode }) {
 
       <AnimatePresence>
         {searchOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="product-search-title"
-            className="fixed inset-0 z-[60] bg-brand-dark/95 backdrop-blur-md flex items-center justify-center px-6"
-          >
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} role="dialog" aria-modal="true" aria-labelledby="product-search-title" className="fixed inset-0 z-[60] bg-brand-dark/95 backdrop-blur-md flex items-center justify-center px-6">
             <button type="button" onClick={() => setSearchOpen(false)} aria-label="Close product search" className="absolute top-6 right-6 md:top-8 md:right-8 p-2 text-brand-gray hover:text-brand-light">
               <FiX size={28} aria-hidden="true" />
             </button>
@@ -170,19 +151,8 @@ export default function Navbar({ darkMode, toggleDarkMode }) {
               <p id="product-search-title" className="label-tag text-center mb-6">Search Products</p>
               <form onSubmit={handleSearch} role="search" className="flex gap-2">
                 <label htmlFor="global-product-search" className="sr-only">Search products</label>
-                <input
-                  id="global-product-search"
-                  autoFocus
-                  type="search"
-                  value={searchQuery}
-                  onChange={e => setSearchQuery(e.target.value)}
-                  placeholder="Search shoes, jackets, accessories..."
-                  autoComplete="off"
-                  className="input-field text-lg flex-1"
-                />
-                <button type="submit" className="btn-primary px-6" aria-label="Submit product search">
-                  <FiSearch size={20} aria-hidden="true" />
-                </button>
+                <input id="global-product-search" autoFocus type="search" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder="Search shoes, jackets, accessories..." autoComplete="off" className="input-field text-lg flex-1" />
+                <button type="submit" className="btn-primary px-6" aria-label="Submit product search"><FiSearch size={20} aria-hidden="true" /></button>
               </form>
             </div>
           </motion.div>
