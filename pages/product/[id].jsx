@@ -1,6 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Head from 'next/head';
-import { useRouter } from 'next/router';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
@@ -10,34 +9,22 @@ import { productsAPI, usersAPI } from '../../lib/api';
 import { orderOnWhatsApp, TIKTOK_URL } from '../../lib/whatsapp';
 import { useAuth } from '../../lib/AuthContext';
 import ProductStructuredData from '../../components/ProductStructuredData';
+import { SITE_NAME, SITE_URL } from '../../lib/site';
 import toast from 'react-hot-toast';
 
-export default function ProductDetail() {
-  const router = useRouter();
-  const { id } = router.query;
+export default function ProductDetail({ initialProduct }) {
   const { user } = useAuth();
-  const [product, setProduct] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [product, setProduct] = useState(initialProduct);
   const [selectedImage, setSelectedImage] = useState(0);
-  const [selectedColor, setSelectedColor] = useState('');
-  const [selectedSize, setSelectedSize] = useState('');
+  const [selectedColor, setSelectedColor] = useState(initialProduct.colors?.[0] || '');
+  const [selectedSize, setSelectedSize] = useState(initialProduct.sizes?.[0] || '');
   const [wishlisted, setWishlisted] = useState(false);
   const [reviewRating, setReviewRating] = useState(5);
   const [reviewComment, setReviewComment] = useState('');
   const [submittingReview, setSubmittingReview] = useState(false);
   const [activeTab, setActiveTab] = useState('description');
 
-  useEffect(() => {
-    if (!id) return;
-    productsAPI.getOne(id).then(res => {
-      setProduct(res.data);
-      if (res.data.colors?.length > 0) setSelectedColor(res.data.colors[0]);
-      if (res.data.sizes?.length > 0) setSelectedSize(res.data.sizes[0]);
-    }).catch(() => router.push('/shop')).finally(() => setLoading(false));
-  }, [id]);
-
   const handleOrder = () => {
-    if (!product) return;
     orderOnWhatsApp({ productName: product.name, price: product.price, userName: user?.name || null, color: selectedColor || null, size: selectedSize || null });
   };
 
@@ -51,7 +38,7 @@ export default function ProductDetail() {
   };
 
   const handleShare = async () => {
-    if (!product || typeof window === 'undefined') return;
+    if (typeof window === 'undefined') return;
     try {
       if (navigator.share) await navigator.share({ title: product.name, url: window.location.href });
       else {
@@ -70,32 +57,51 @@ export default function ProductDetail() {
     setSubmittingReview(true);
     try {
       await productsAPI.addReview(product._id, { rating: reviewRating, comment: reviewComment });
-      toast.success('Review submitted');
-      setReviewComment('');
       const res = await productsAPI.getOne(product._id);
       setProduct(res.data);
+      toast.success('Review submitted');
+      setReviewComment('');
     } catch (err) { toast.error(err.response?.data?.message || 'Failed to submit review'); }
     finally { setSubmittingReview(false); }
   };
-
-  if (loading) return <div className="min-h-screen flex items-center justify-center px-6"><div className="text-center"><div className="w-10 h-10 border-2 border-brand-pink border-t-transparent rounded-full animate-spin mx-auto mb-4" /><p className="label-tag">Loading product</p></div></div>;
-  if (!product) return null;
 
   const discount = product.comparePrice && product.comparePrice > product.price ? Math.round(((product.comparePrice - product.price) / product.comparePrice) * 100) : null;
   const hasImages = product.images?.length > 0;
   const selectedImageUrl = product.images?.[selectedImage]?.url;
   const rating = Math.round(Number(product.rating) || 0);
+  const identifier = product.slug || product._id;
+  const canonicalUrl = `${SITE_URL}/product/${encodeURIComponent(identifier)}`;
+  const description = product.description?.slice(0, 160) || `Shop ${product.name} from ${SITE_NAME}.`;
 
   return (
     <>
       <Head>
-        <title>{product.name} — Nicky Collections</title>
-        <meta name="description" content={product.description?.slice(0, 160) || `Shop ${product.name} from Nicky Collections.`} />
-        <meta property="og:title" content={`${product.name} — Nicky Collections`} />
-        {product.description && <meta property="og:description" content={product.description.slice(0, 160)} />}
+        <title>{product.name} — {SITE_NAME}</title>
+        <meta name="description" content={description} />
+        <link rel="canonical" href={canonicalUrl} />
+        <meta name="robots" content="index,follow,max-image-preview:large" />
+        <meta property="og:type" content="product" />
+        <meta property="og:title" content={`${product.name} — ${SITE_NAME}`} />
+        <meta property="og:description" content={description} />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:site_name" content={SITE_NAME} />
         {selectedImageUrl && <meta property="og:image" content={selectedImageUrl} />}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={`${product.name} — ${SITE_NAME}`} />
+        <meta name="twitter:description" content={description} />
+        {selectedImageUrl && <meta name="twitter:image" content={selectedImageUrl} />}
       </Head>
       <ProductStructuredData product={product} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
+          { '@type': 'ListItem', position: 2, name: 'Shop', item: `${SITE_URL}/shop` },
+          ...(product.category ? [{ '@type': 'ListItem', position: 3, name: product.category, item: `${SITE_URL}/shop?category=${encodeURIComponent(product.category)}` }] : []),
+          { '@type': 'ListItem', position: product.category ? 4 : 3, name: product.name, item: canonicalUrl },
+        ],
+      }).replace(/</g, '\\u003c') }} />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 pt-20 pb-28 lg:pb-20">
         <nav aria-label="Breadcrumb" className="flex items-center gap-2 mb-8 overflow-hidden">
@@ -128,7 +134,7 @@ export default function ProductDetail() {
 
               {product.numReviews > 0 && <a href="#reviews" onClick={() => setActiveTab('reviews')} className="inline-flex items-center gap-2 mb-6 group"><span className="flex gap-1" aria-label={`${product.rating} out of 5 stars`}>{[...Array(5)].map((_, i) => <FiStar key={i} size={14} fill={i < rating ? 'currentColor' : 'none'} className={i < rating ? 'text-brand-gold' : 'text-brand-gray'} />)}</span><span className="font-body text-sm text-brand-gray group-hover:text-brand-light transition-colors">{product.rating?.toFixed?.(1) || product.rating} · {product.numReviews} reviews</span></a>}
 
-              <div className="flex items-baseline gap-4 mb-7"><span className="font-display text-4xl md:text-5xl font-medium text-brand-light">${product.price.toFixed(2)}</span>{product.comparePrice && product.comparePrice > product.price && <span className="font-body text-base text-brand-gray line-through">${product.comparePrice.toFixed(2)}</span>}{discount && <span className="label-tag text-brand-pink">Save {discount}%</span>}</div>
+              <div className="flex items-baseline gap-4 mb-7"><span className="font-display text-4xl md:text-5xl font-medium text-brand-light">${Number(product.price).toFixed(2)}</span>{product.comparePrice && product.comparePrice > product.price && <span className="font-body text-base text-brand-gray line-through">${Number(product.comparePrice).toFixed(2)}</span>}{discount && <span className="label-tag text-brand-pink">Save {discount}%</span>}</div>
 
               <div className="h-px bg-white/10 mb-7" />
 
@@ -173,4 +179,18 @@ export default function ProductDetail() {
       </div>
     </>
   );
+}
+
+export async function getServerSideProps(context) {
+  const identifier = Array.isArray(context.params?.id) ? context.params.id[0] : context.params?.id;
+  if (!identifier) return { notFound: true };
+
+  try {
+    const response = await productsAPI.getOne(identifier);
+    if (!response.data) return { notFound: true };
+    return { props: { initialProduct: response.data } };
+  } catch (error) {
+    if (error.response?.status === 404) return { notFound: true };
+    return { notFound: true };
+  }
 }
