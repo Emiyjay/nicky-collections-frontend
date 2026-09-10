@@ -5,8 +5,8 @@ import Navbar from './Navbar';
 import Footer from './Footer';
 import RelatedProducts from './RelatedProducts';
 import { Toaster } from 'react-hot-toast';
-import { FaWhatsapp } from 'react-icons/fa';
-import { WHATSAPP_LINK } from '../lib/whatsapp';
+import { FiMail } from 'react-icons/fi';
+import { CONTACT_EMAIL } from '../lib/site';
 import { productsAPI } from '../lib/api';
 
 export default function Layout({ children }) {
@@ -61,17 +61,15 @@ export default function Layout({ children }) {
         <Footer />
 
         <a
-          href={WHATSAPP_LINK}
-          target="_blank"
-          rel="noreferrer"
-          aria-label="Chat with Nicky Collections on WhatsApp"
+          href={`mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent('Nicky Collections Inquiry')}`}
+          aria-label="Email Nicky Collections"
           className="fixed bottom-5 right-5 md:bottom-6 md:right-6 z-50 group"
         >
           <span className="absolute right-0 bottom-full mb-3 hidden md:block whitespace-nowrap bg-brand-dark border border-white/10 px-3 py-2 text-xs font-body tracking-wide text-brand-light opacity-0 translate-y-1 pointer-events-none transition-all duration-200 group-hover:opacity-100 group-hover:translate-y-0 group-focus-within:opacity-100 group-focus-within:translate-y-0">
-            Chat on WhatsApp
+            Email Nicky Collections
           </span>
-          <span className="flex w-14 h-14 items-center justify-center rounded-full bg-green-500 shadow-lg shadow-green-500/30 hover:bg-green-400 hover:scale-105 transition-transform duration-300">
-            <FaWhatsapp size={26} color="white" aria-hidden="true" />
+          <span className="flex w-14 h-14 items-center justify-center rounded-full bg-brand-pink shadow-lg shadow-brand-pink/25 hover:bg-brand-pink/90 hover:scale-105 transition-transform duration-300">
+            <FiMail size={25} color="white" aria-hidden="true" />
           </span>
         </a>
 
