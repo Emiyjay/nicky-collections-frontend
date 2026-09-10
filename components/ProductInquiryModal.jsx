@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { FiCheck, FiMail, FiPhone, FiX } from 'react-icons/fi';
 import { sendProductInquiry, openProductEmailFallback } from '../lib/contact';
 import styles from './ProductInquiryModal.module.css';
@@ -11,9 +11,13 @@ export default function ProductInquiryModal() {
   const [status, setStatus] = useState('idle');
   const [error, setError] = useState('');
   const [reference, setReference] = useState('');
+  const modalRef = useRef(null);
+  const closeButtonRef = useRef(null);
+  const restoreFocusRef = useRef(null);
 
   useEffect(() => {
     const handleOpen = (event) => {
+      restoreFocusRef.current = document.activeElement;
       const detail = event.detail || {};
       setRequest(detail);
       setForm((current) => ({ ...current, name: clean(detail.userName), email: clean(detail.userEmail) }));
@@ -27,9 +31,32 @@ export default function ProductInquiryModal() {
 
   useEffect(() => {
     if (!request) return undefined;
-    const handleKeyDown = (event) => { if (event.key === 'Escape' && status !== 'sending') setRequest(null); };
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape' && status !== 'sending') {
+        setRequest(null);
+        return;
+      }
+      if (event.key !== 'Tab' || !modalRef.current) return;
+      const focusable = modalRef.current.querySelectorAll(
+        'button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [href], [tabindex]:not([tabindex="-1"])'
+      );
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
     document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+    const focusTimer = window.requestAnimationFrame(() => closeButtonRef.current?.focus());
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      window.cancelAnimationFrame(focusTimer);
+    };
   }, [request, status]);
 
   useEffect(() => {
@@ -37,6 +64,16 @@ export default function ProductInquiryModal() {
     const previous = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     return () => { document.body.style.overflow = previous; };
+  }, [request]);
+
+  useEffect(() => {
+    if (request) return undefined;
+    const element = restoreFocusRef.current;
+    if (element && typeof element.focus === 'function' && document.contains(element)) {
+      window.requestAnimationFrame(() => element.focus());
+    }
+    restoreFocusRef.current = null;
+    return undefined;
   }, [request]);
 
   const product = request?.product || {};
@@ -80,8 +117,8 @@ export default function ProductInquiryModal() {
 
   return (
     <div className={styles.backdrop} role="presentation" onMouseDown={(event) => event.target === event.currentTarget && close()}>
-      <section className={styles.modal} role="dialog" aria-modal="true" aria-labelledby="product-inquiry-title">
-        <button className={styles.close} type="button" onClick={close} aria-label="Close order inquiry" disabled={status === 'sending'}><FiX size={20} /></button>
+      <section ref={modalRef} className={styles.modal} role="dialog" aria-modal="true" aria-labelledby="product-inquiry-title" tabIndex="-1">
+        <button ref={closeButtonRef} className={styles.close} type="button" onClick={close} aria-label="Close order inquiry" disabled={status === 'sending'}><FiX size={20} /></button>
         {status === 'success' ? (
           <div className={styles.success}>
             <div className={styles.successIcon}><FiCheck size={28} /></div><p className={styles.eyebrow}>Inquiry received</p>
