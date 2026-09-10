@@ -3,10 +3,10 @@ import Head from 'next/head';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { FiStar, FiHeart, FiShare2, FiArrowLeft, FiCheck, FiShield, FiTruck, FiMessageCircle } from 'react-icons/fi';
-import { FaWhatsapp, FaTiktok } from 'react-icons/fa';
+import { FiStar, FiHeart, FiShare2, FiArrowLeft, FiCheck, FiShield, FiTruck, FiMessageCircle, FiMail } from 'react-icons/fi';
+import { FaTiktok } from 'react-icons/fa';
 import { productsAPI, usersAPI } from '../../lib/api';
-import { orderOnWhatsApp, TIKTOK_URL } from '../../lib/whatsapp';
+import { orderOnEmail, TIKTOK_URL } from '../../lib/whatsapp';
 import { useAuth } from '../../lib/AuthContext';
 import ProductStructuredData from '../../components/ProductStructuredData';
 import { SITE_NAME, SITE_URL } from '../../lib/site';
@@ -25,7 +25,7 @@ export default function ProductDetail({ initialProduct }) {
   const [activeTab, setActiveTab] = useState('description');
 
   const handleOrder = () => {
-    orderOnWhatsApp({ productName: product.name, price: product.price, userName: user?.name || null, color: selectedColor || null, size: selectedSize || null });
+    orderOnEmail({ product, productName: product.name, price: product.price, userName: user?.name || null, color: selectedColor || null, size: selectedSize || null });
   };
 
   const handleWishlist = async () => {
@@ -145,12 +145,13 @@ export default function ProductDetail({ initialProduct }) {
               <div className={`flex items-center justify-between gap-3 mb-7 p-3 border ${product.inStock ? 'border-green-400/20 bg-green-400/5 text-green-400' : 'border-red-400/20 bg-red-400/5 text-red-400'}`}><span className="flex items-center gap-2"><FiCheck size={14} /><span className="font-body text-xs tracking-widest uppercase">{product.inStock ? 'In stock' : 'Currently unavailable'}</span></span>{product.stockCount > 0 && product.stockCount <= 5 && <span className="font-body text-xs text-brand-gray">Only {product.stockCount} left</span>}</div>
 
               <div className="space-y-3">
-                <button onClick={handleOrder} disabled={!product.inStock} className="w-full bg-green-500 hover:bg-green-400 text-white font-body font-semibold text-sm tracking-widest uppercase py-4 flex items-center justify-center gap-3 transition-all hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"><FaWhatsapp size={18} /> Order on WhatsApp</button>
+                <button onClick={handleOrder} disabled={!product.inStock} className="w-full bg-brand-pink hover:bg-brand-pink/90 text-white font-body font-semibold text-sm tracking-widest uppercase py-4 flex items-center justify-center gap-3 transition-all hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"><FiMail size={18} /> Order by Email</button>
+                <p className="font-body text-xs leading-5 text-brand-gray">Your email will be pre-filled with the product name, price, description, product image links and page link so we can confirm your order.</p>
                 <div className="grid grid-cols-[1fr_auto] gap-3"><button onClick={handleWishlist} className={`btn-outline flex items-center justify-center gap-2 ${wishlisted ? 'border-brand-pink text-brand-pink' : ''}`} aria-label={wishlisted ? 'Remove from wishlist' : 'Add to wishlist'}><FiHeart size={16} fill={wishlisted ? 'currentColor' : 'none'} />{wishlisted ? 'Saved' : 'Wishlist'}</button><button onClick={handleShare} className="btn-outline px-4" aria-label="Share product"><FiShare2 size={16} /></button></div>
               </div>
 
               <div className="grid grid-cols-3 gap-2 mt-7 pt-7 border-t border-white/10">
-                <div className="text-center"><FiMessageCircle className="mx-auto mb-2 text-brand-pink" size={17} /><p className="font-body text-[10px] text-brand-gray uppercase tracking-wider">Direct chat</p></div>
+                <div className="text-center"><FiMessageCircle className="mx-auto mb-2 text-brand-pink" size={17} /><p className="font-body text-[10px] text-brand-gray uppercase tracking-wider">Direct email</p></div>
                 <div className="text-center"><FiShield className="mx-auto mb-2 text-brand-gold" size={17} /><p className="font-body text-[10px] text-brand-gray uppercase tracking-wider">Personal service</p></div>
                 <div className="text-center"><FiTruck className="mx-auto mb-2 text-brand-light" size={17} /><p className="font-body text-[10px] text-brand-gray uppercase tracking-wider">Order support</p></div>
               </div>
@@ -175,7 +176,7 @@ export default function ProductDetail({ initialProduct }) {
       </div>
 
       <div className="fixed inset-x-0 bottom-0 z-40 p-3 bg-brand-dark/95 backdrop-blur-xl border-t border-white/10 lg:hidden safe-area-bottom" aria-label="Mobile purchase actions">
-        <div className="max-w-7xl mx-auto grid grid-cols-[1fr_auto] gap-2"><button onClick={handleOrder} disabled={!product.inStock} className="bg-green-500 hover:bg-green-400 text-white font-body font-semibold text-xs tracking-widest uppercase py-3.5 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"><FaWhatsapp size={17} /> Order on WhatsApp</button><button onClick={handleWishlist} className="w-12 border border-white/10 flex items-center justify-center text-brand-light" aria-label={wishlisted ? 'Remove from wishlist' : 'Add to wishlist'}><FiHeart size={18} fill={wishlisted ? 'currentColor' : 'none'} className={wishlisted ? 'text-brand-pink' : ''} /></button></div>
+        <div className="max-w-7xl mx-auto grid grid-cols-[1fr_auto] gap-2"><button onClick={handleOrder} disabled={!product.inStock} className="bg-brand-pink hover:bg-brand-pink/90 text-white font-body font-semibold text-xs tracking-widest uppercase py-3.5 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"><FiMail size={17} /> Order by Email</button><button onClick={handleWishlist} className="w-12 border border-white/10 flex items-center justify-center text-brand-light" aria-label={wishlisted ? 'Remove from wishlist' : 'Add to wishlist'}><FiHeart size={18} fill={wishlisted ? 'currentColor' : 'none'} className={wishlisted ? 'text-brand-pink' : ''} /></button></div>
       </div>
     </>
   );
