@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { FaTiktok, FaInstagram } from 'react-icons/fa';
 import { FiArrowRight, FiMail } from 'react-icons/fi';
-import { TIKTOK_URL } from '../lib/whatsapp';
+import { TIKTOK_URL } from '../lib/contact';
 import { CONTACT_EMAIL } from '../lib/site';
 
 export default function About() {
