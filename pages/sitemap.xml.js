@@ -29,7 +29,7 @@ const escapeXml = (value) => String(value)
 
 const toUrl = (path) => `${SITE_URL}${path}`;
 
-export default async function handler(req, res) {
+async function buildSitemap() {
   const urls = [...staticUrls.map(toUrl)];
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
@@ -42,6 +42,7 @@ export default async function handler(req, res) {
       do {
         const response = await fetch(`${apiUrl}/products?page=${page}&limit=${limit}`);
         if (!response.ok) throw new Error(`Product API returned ${response.status}`);
+
         const payload = await response.json();
         const products = Array.isArray(payload) ? payload : payload.products || [];
         pages = Math.max(Number(payload.pages) || 1, page);
@@ -59,12 +60,23 @@ export default async function handler(req, res) {
   }
 
   const uniqueUrls = [...new Set(urls)];
-  const xml = `<?xml version="1.0" encoding="UTF-8"?>\n` +
+  return `<?xml version="1.0" encoding="UTF-8"?>\n` +
     `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
     uniqueUrls.map((url) => `  <url><loc>${escapeXml(url)}</loc></url>`).join('\n') +
     `\n</urlset>`;
+}
+
+export async function getServerSideProps({ res }) {
+  const xml = await buildSitemap();
 
   res.setHeader('Content-Type', 'application/xml; charset=utf-8');
   res.setHeader('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=86400');
-  res.status(200).send(xml);
+  res.statusCode = 200;
+  res.end(xml);
+
+  return { props: {} };
+}
+
+export default function Sitemap() {
+  return null;
 }
