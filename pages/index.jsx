@@ -9,6 +9,7 @@ import ProductCard from '../components/ProductCard';
 import { productsAPI } from '../lib/api';
 import { TIKTOK_URL } from '../lib/contact';
 import { CONTACT_EMAIL, SITE_NAME, SITE_URL } from '../lib/site';
+import { optimizeCloudinaryImage } from '../lib/image';
 
 const CATEGORIES = [
   { label: 'Footwear', eyebrow: 'Step out', href: '/shop?category=footwear', mark: '01' },
@@ -31,7 +32,7 @@ export default function Home() {
   }, []);
 
   const heroProduct = featured[0] || newArrivals[0];
-  const heroImage = heroProduct?.images?.[0]?.url;
+  const heroImage = optimizeCloudinaryImage(heroProduct?.images?.[0]?.url, { width: 1400, height: 1750, crop: true });
 
   return (
     <>
