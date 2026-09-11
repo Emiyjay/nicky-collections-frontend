@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { FiHeart, FiEye, FiStar, FiArrowUpRight } from 'react-icons/fi';
 import { usersAPI } from '../lib/api';
+import { optimizeCloudinaryImage } from '../lib/image';
 import { useAuth } from '../lib/AuthContext';
 import toast from 'react-hot-toast';
 
@@ -33,8 +34,8 @@ export default function ProductCard({ product, index = 0, priority = false }) {
     }
   };
 
-  const mainImage = product.images?.[0]?.url || '/placeholder.jpg';
-  const secondImage = product.images?.[1]?.url;
+  const mainImage = optimizeCloudinaryImage(product.images?.[0]?.url, { width: 800 }) || '/placeholder.jpg';
+  const secondImage = optimizeCloudinaryImage(product.images?.[1]?.url, { width: 800 });
   const productPath = `/product/${product.slug || product._id}`;
   const price = Number(product.price) || 0;
   const comparePrice = Number(product.comparePrice) || 0;
