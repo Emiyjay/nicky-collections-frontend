@@ -7,7 +7,7 @@ import { usersAPI } from '../lib/api';
 import { useAuth } from '../lib/AuthContext';
 import toast from 'react-hot-toast';
 
-export default function ProductCard({ product, index = 0 }) {
+export default function ProductCard({ product, index = 0, priority = false }) {
   const [wishlisted, setWishlisted] = useState(false);
   const [wishlistBusy, setWishlistBusy] = useState(false);
   const { user } = useAuth();
@@ -58,7 +58,7 @@ export default function ProductCard({ product, index = 0 }) {
               fill
               sizes="(max-width: 767px) 50vw, (max-width: 1023px) 33vw, 25vw"
               className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.045]"
-              priority={index < 4}
+              priority={priority}
             />
             {secondImage && (
               <Image
