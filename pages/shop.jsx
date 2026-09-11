@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FiFilter, FiX, FiChevronDown, FiSearch, FiSliders, FiArrowRight } from 'react-icons/fi';
 import ProductCard from '../components/ProductCard';
 import { productsAPI } from '../lib/api';
+import { SITE_NAME, SITE_URL } from '../lib/site';
 
 const CATEGORIES = ['all', 'footwear', 'outerwear', 'accessories', 'clothing', 'collectibles', 'other'];
 const SORT_OPTIONS = [
@@ -32,6 +33,7 @@ export default function Shop() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [retryKey, setRetryKey] = useState(0);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [pages, setPages] = useState(1);
@@ -76,7 +78,7 @@ export default function Shop() {
       .catch(() => { if (!cancelled) { setProducts([]); setTotal(0); setPages(1); setError(true); } })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
-  }, [router.isReady, category, sort, minPrice, maxPrice, search, page]);
+  }, [router.isReady, category, sort, minPrice, maxPrice, search, page, retryKey]);
 
   const updateUrl = (updates = {}) => {
     const next = { category, sort, minPrice, maxPrice, search, page, ...updates };
@@ -126,10 +128,22 @@ export default function Shop() {
     return result;
   }, [page, pages]);
 
+  const hasIndexableFilters = category === 'all' && !search && !minPrice && !maxPrice && page === 1;
+
   return <>
     <Head>
-      <title>{category === 'all' ? 'Shop' : `${categoryLabel(category)} — Shop`} — Nicky Collections</title>
+      <title>{category === 'all' ? 'Shop' : `${categoryLabel(category)} — Shop`} — ${SITE_NAME}</title>
       <meta name="description" content="Explore footwear, outerwear, accessories, clothing and collectibles from Nicky Collections." />
+      <link rel="canonical" href={`${SITE_URL}/shop`} />
+      <meta name="robots" content={hasIndexableFilters ? 'index,follow,max-image-preview:large' : 'noindex,follow'} />
+      <meta property="og:type" content="website" />
+      <meta property="og:title" content={`${category === 'all' ? 'Shop' : categoryLabel(category)} — ${SITE_NAME}`} />
+      <meta property="og:description" content="Explore footwear, outerwear, accessories, clothing and collectibles from Nicky Collections." />
+      <meta property="og:url" content={`${SITE_URL}/shop`} />
+      <meta property="og:site_name" content={SITE_NAME} />
+      <meta name="twitter:card" content="summary" />
+      <meta name="twitter:title" content={`${category === 'all' ? 'Shop' : categoryLabel(category)} — ${SITE_NAME}`} />
+      <meta name="twitter:description" content="Explore footwear, outerwear, accessories, clothing and collectibles from Nicky Collections." />
     </Head>
 
     <header className="pt-20 pb-8 px-6 md:px-8 max-w-7xl mx-auto">
@@ -160,14 +174,14 @@ export default function Shop() {
           </div>
         </aside>
 
-        <main className="flex-1 min-w-0">
+        <main className="flex-1 min-w-0" id="main-content">
           <div className="flex flex-wrap items-center justify-between gap-3 mb-6 pb-4 border-b border-white/10">
             <div className="flex flex-wrap items-center gap-2" aria-live="polite"><span className="label-tag text-brand-gray">Showing</span>{activeFilters.map((filter) => <span key={filter} className="font-body text-xs border border-white/10 px-2.5 py-1.5 text-brand-light">{filter}</span>)}</div>
             <button type="button" onClick={() => setFilterOpen(true)} className="lg:hidden btn-outline text-xs flex items-center gap-2"><FiSliders size={14} /> Filters</button>
           </div>
 
           <AnimatePresence mode="wait">
-            {error ? <motion.div key="error" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="border border-brand-pink/20 bg-brand-pink/5 p-12 text-center"><h2 className="font-display text-3xl text-brand-light mb-3">We couldn’t load the collection</h2><p className="font-body text-brand-gray mb-6">Check your connection and try again.</p><button onClick={() => setPage((current) => current)} className="btn-primary">Retry</button></motion.div>
+            {error ? <motion.div key="error" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="border border-brand-pink/20 bg-brand-pink/5 p-12 text-center"><h2 className="font-display text-3xl text-brand-light mb-3">We couldn’t load the collection</h2><p className="font-body text-brand-gray mb-6">Check your connection and try again.</p><button onClick={() => setRetryKey((current) => current + 1)} className="btn-primary">Retry</button></motion.div>
               : loading ? <div key="loading" className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">{Array.from({ length: 12 }).map((_, i) => <SkeletonCard key={i} />)}</div>
               : products.length === 0 ? <motion.div key="empty" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="border border-white/10 p-12 md:p-20 text-center"><FiSearch size={30} className="mx-auto mb-5 text-brand-gray" /><h2 className="font-display text-3xl text-brand-light mb-3">Nothing matched your search</h2><p className="font-body text-brand-gray mb-7">Try a different term, category or price range.</p><button onClick={clearFilters} className="btn-primary">Clear filters</button></motion.div>
               : <motion.div key="products" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">{products.map((product, i) => <ProductCard key={product._id} product={product} index={i} />)}</motion.div>}
