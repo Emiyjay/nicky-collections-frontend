@@ -4,14 +4,24 @@ import { motion } from 'framer-motion';
 import { FaTiktok, FaInstagram } from 'react-icons/fa';
 import { FiArrowRight, FiMail } from 'react-icons/fi';
 import { TIKTOK_URL } from '../lib/contact';
-import { CONTACT_EMAIL } from '../lib/site';
+import { CONTACT_EMAIL, SITE_NAME, SITE_URL } from '../lib/site';
 
 export default function About() {
   return (
     <>
       <Head>
-        <title>About — Nicky Collections</title>
+        <title>About — {SITE_NAME}</title>
         <meta name="description" content="Learn about Nicky Collections, a fashion store focused on exclusive drops and carefully curated pieces." />
+        <link rel="canonical" href={`${SITE_URL}/about`} />
+        <meta name="robots" content="index,follow,max-image-preview:large" />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content={`About — ${SITE_NAME}`} />
+        <meta property="og:description" content="Discover the story and curated fashion approach behind Nicky Collections." />
+        <meta property="og:url" content={`${SITE_URL}/about`} />
+        <meta property="og:site_name" content={SITE_NAME} />
+        <meta name="twitter:card" content="summary" />
+        <meta name="twitter:title" content={`About — ${SITE_NAME}`} />
+        <meta name="twitter:description" content="Discover the story and curated fashion approach behind Nicky Collections." />
       </Head>
 
       <section className="pt-32 pb-20 px-6 md:px-8 max-w-5xl mx-auto">
