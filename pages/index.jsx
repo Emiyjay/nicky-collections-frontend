@@ -8,7 +8,7 @@ import { FaTiktok } from 'react-icons/fa';
 import ProductCard from '../components/ProductCard';
 import { productsAPI } from '../lib/api';
 import { TIKTOK_URL } from '../lib/contact';
-import { CONTACT_EMAIL } from '../lib/site';
+import { CONTACT_EMAIL, SITE_NAME, SITE_URL } from '../lib/site';
 
 const CATEGORIES = [
   { label: 'Footwear', eyebrow: 'Step out', href: '/shop?category=footwear', mark: '01' },
@@ -36,10 +36,18 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>Nicky Collections — Fashion Without Limits</title>
+        <title>{SITE_NAME} — Fashion Without Limits</title>
         <meta name="description" content="Discover fashion-forward footwear, outerwear, accessories and collectibles from Nicky Collections. Shop new arrivals and order directly by email." />
-        <meta property="og:title" content="Nicky Collections — Fashion Without Limits" />
+        <link rel="canonical" href={SITE_URL} />
+        <meta name="robots" content="index,follow,max-image-preview:large" />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content={`${SITE_NAME} — Fashion Without Limits`} />
         <meta property="og:description" content="Fashion-forward drops, hand-picked for your next look." />
+        <meta property="og:url" content={SITE_URL} />
+        <meta property="og:site_name" content={SITE_NAME} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={`${SITE_NAME} — Fashion Without Limits`} />
+        <meta name="twitter:description" content="Fashion-forward drops, hand-picked for your next look." />
       </Head>
       <main>
         <section className="relative min-h-[calc(100vh-72px)] overflow-hidden bg-brand-dark border-b border-white/5">
