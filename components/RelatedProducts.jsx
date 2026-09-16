@@ -25,7 +25,7 @@ export default function RelatedProducts({ productId, category }) {
           </h2>
         </div>
         {category && (
-          <Link href={`/collections/${category}`} className="label-tag text-brand-gray hover:text-brand-light transition-colors shrink-0">
+          <Link href={`/shop?category=${encodeURIComponent(category)}`} className="label-tag text-brand-gray hover:text-brand-light transition-colors shrink-0">
             Shop {category} →
           </Link>
         )}
