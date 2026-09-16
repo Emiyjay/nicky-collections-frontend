@@ -1,5 +1,4 @@
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/router';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from './Navbar';
 import Footer from './Footer';
@@ -7,36 +6,11 @@ import RelatedProducts from './RelatedProducts';
 import { Toaster } from 'react-hot-toast';
 import { FiMail } from 'react-icons/fi';
 import { CONTACT_EMAIL } from '../lib/site';
-import { productsAPI } from '../lib/api';
 
-export default function Layout({ children }) {
+export default function Layout({ children, productContext = null }) {
   const [darkMode, setDarkMode] = useState(true);
-  const [relatedProductId, setRelatedProductId] = useState(null);
-  const [relatedCategory, setRelatedCategory] = useState(null);
-  const router = useRouter();
-
-  useEffect(() => {
-    const identifier = router.isReady && router.pathname.startsWith('/product/') ? router.query.id : null;
-    if (!identifier) {
-      setRelatedProductId(null);
-      setRelatedCategory(null);
-      return;
-    }
-
-    const loadProduct = identifier.length === 24 && /^[a-f0-9]+$/i.test(identifier)
-      ? productsAPI.getOne(identifier)
-      : productsAPI.getBySlug(identifier);
-
-    loadProduct
-      .then((res) => {
-        setRelatedProductId(res.data?._id || null);
-        setRelatedCategory(res.data?.category || null);
-      })
-      .catch(() => {
-        setRelatedProductId(null);
-        setRelatedCategory(null);
-      });
-  }, [router.isReady, router.pathname, router.query.id]);
+  const relatedProductId = productContext?._id || null;
+  const relatedCategory = productContext?.category || null;
 
   return (
     <div className={darkMode ? 'dark' : ''}>
