@@ -5,10 +5,11 @@ import { SITE_NAME, SITE_URL } from '../lib/site';
 
 export default function IntentCollectionPage({ title, description, path, eyebrow, products = [], emptyMessage }) {
   const canonical = `${SITE_URL}${path}`;
+  const pageTitle = `${title} — ${SITE_NAME}`;
   const itemList = products.map((product, index) => ({
     '@type': 'ListItem',
     position: index + 1,
-    url: `${SITE_URL}/product/${product.slug || product._id}`,
+    url: `${SITE_URL}/product/${encodeURIComponent(product.slug || product._id)}`,
     name: product.name,
   }));
 
@@ -27,14 +28,19 @@ export default function IntentCollectionPage({ title, description, path, eyebrow
   return (
     <>
       <Head>
-        <title>{title} — {SITE_NAME}</title>
+        <title>{pageTitle}</title>
         <meta name="description" content={description} />
         <link rel="canonical" href={canonical} />
-        <meta property="og:title" content={`${title} — ${SITE_NAME}`} />
+        <meta name="robots" content="index,follow,max-image-preview:large" />
+        <meta property="og:title" content={pageTitle} />
         <meta property="og:description" content={description} />
         <meta property="og:url" content={canonical} />
         <meta property="og:type" content="website" />
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
+        <meta property="og:site_name" content={SITE_NAME} />
+        <meta name="twitter:card" content="summary" />
+        <meta name="twitter:title" content={pageTitle} />
+        <meta name="twitter:description" content={description} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData).replace(/</g, '\\u003c') }} />
       </Head>
 
       <main className="pt-32 pb-20 px-6 md:px-8 max-w-7xl mx-auto">
