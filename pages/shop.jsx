@@ -132,7 +132,7 @@ export default function Shop() {
 
   return <>
     <Head>
-      <title>{category === 'all' ? 'Shop' : `${categoryLabel(category)} — Shop`} — ${SITE_NAME}</title>
+      <title>{`${category === 'all' ? 'Shop' : `${categoryLabel(category)} — Shop`} — ${SITE_NAME}`}</title>
       <meta name="description" content="Explore footwear, outerwear, accessories, clothing and collectibles from Nicky Collections." />
       <link rel="canonical" href={`${SITE_URL}/shop`} />
       <meta name="robots" content={hasIndexableFilters ? 'index,follow,max-image-preview:large' : 'noindex,follow'} />
