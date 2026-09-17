@@ -3,7 +3,11 @@ import { motion } from 'framer-motion';
 import { FaTiktok } from 'react-icons/fa';
 import { FiMail } from 'react-icons/fi';
 import { TIKTOK_URL, contactOnEmail } from '../lib/contact';
-import { CONTACT_EMAIL } from '../lib/site';
+import { CONTACT_EMAIL, SITE_NAME, SITE_URL } from '../lib/site';
+
+const TITLE = `Contact — ${SITE_NAME}`;
+const DESCRIPTION = `Contact ${SITE_NAME} for orders, product questions, support and business inquiries.`;
+const CANONICAL = `${SITE_URL}/contact`;
 
 export default function Contact() {
   const handleSubmit = (e) => {
@@ -14,7 +18,20 @@ export default function Contact() {
 
   return (
     <>
-      <Head><title>Contact — Nicky Collections</title></Head>
+      <Head>
+        <title>{TITLE}</title>
+        <meta name="description" content={DESCRIPTION} />
+        <link rel="canonical" href={CANONICAL} />
+        <meta name="robots" content="index,follow,max-image-preview:large" />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content={TITLE} />
+        <meta property="og:description" content={DESCRIPTION} />
+        <meta property="og:url" content={CANONICAL} />
+        <meta property="og:site_name" content={SITE_NAME} />
+        <meta name="twitter:card" content="summary" />
+        <meta name="twitter:title" content={TITLE} />
+        <meta name="twitter:description" content={DESCRIPTION} />
+      </Head>
       <section className="pt-32 pb-20 px-6 md:px-8 max-w-6xl mx-auto">
         <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="mb-16">
           <p className="label-tag text-brand-pink mb-4">Get In Touch</p>
