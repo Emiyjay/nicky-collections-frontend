@@ -49,9 +49,6 @@ export default function ProductStructuredData({ product }) {
       availability: product.inStock
         ? 'https://schema.org/InStock'
         : 'https://schema.org/OutOfStock',
-      ...(product.condition
-        ? { itemCondition: `https://schema.org/${clean(product.condition)}` }
-        : {}),
       seller: {
         '@type': 'Organization',
         name: 'Nicky Collections',
