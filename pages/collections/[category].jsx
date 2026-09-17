@@ -24,9 +24,15 @@ export default function CollectionPage({ category, products, total }) {
         <title>{title}</title>
         <meta name="description" content={meta.description} />
         <link rel="canonical" href={canonical} />
+        <meta name="robots" content="index,follow,max-image-preview:large" />
+        <meta property="og:type" content="website" />
         <meta property="og:title" content={title} />
         <meta property="og:description" content={meta.description} />
         <meta property="og:url" content={canonical} />
+        <meta property="og:site_name" content={SITE_NAME} />
+        <meta name="twitter:card" content="summary" />
+        <meta name="twitter:title" content={title} />
+        <meta name="twitter:description" content={meta.description} />
       </Head>
       <CollectionStructuredData category={category} title={title} description={meta.description} products={products} />
 
