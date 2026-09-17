@@ -2,6 +2,7 @@ import '../styles/globals.css';
 import { AuthProvider } from '../lib/AuthContext';
 import Layout from '../components/Layout';
 import ProductInquiryModal from '../components/ProductInquiryModal';
+import SiteStructuredData from '../components/SiteStructuredData';
 
 export default function App({ Component, pageProps }) {
   const noLayout = Component.noLayout;
@@ -9,6 +10,7 @@ export default function App({ Component, pageProps }) {
 
   return (
     <AuthProvider>
+      <SiteStructuredData />
       {noLayout ? (
         <Component {...pageProps} />
       ) : (
